@@ -22,10 +22,10 @@ dependencies:
     git:
       url: https://github.com/hjiangsu/markdown-editable-textinput.git
       ref: 3ded84267bb951a1d9312a308313d47ea714d210
-  extended_image:
-    git:
-      url: https://github.com/hjiangsu/extended_image.git
-      ref: 8.0.3
+  #extended_image:
+  #  git:
+  #    url: https://github.com/hjiangsu/extended_image.git
+  #    ref: 8.0.3
   lemmy_api_client:
     git:
       url: https://github.com/hjiangsu/lemmy_api_client.git
@@ -33,7 +33,8 @@ dependencies:
   link_preview_generator:
     git:
       url: https://github.com/thunder-app/link_preview_generator.git
-      ref: 0b697ff173d67743ae3c490f49b26e74c46e841c
+      ref: 41505c2a877e207a3924b4a8a2ee39315888c0ce
+  extended_image: ^8.1.1
   cupertino_icons: ^1.0.2
   bloc: ^8.1.2
   flutter_bloc: ^8.1.3
@@ -48,7 +49,7 @@ dependencies:
   dio: ^5.2.1+1
   shared_preferences: ^2.1.2
   html: ^0.15.4
-  http: ^0.13.6
+  http: ^1.1.0
   auto_size_text: ^3.0.0
   go_router: ^8.0.3
   yaml: ^3.1.2
@@ -66,7 +67,10 @@ dependencies:
   share_plus: ^7.0.2
   flex_color_scheme: ^7.1.2
   dynamic_color: ^1.6.5
-  gallery_saver: ^2.3.2
+  gallery_saver:
+    git:
+      url: https://github.com/gwbischof/gallery_saver.git
+      ref: 4c60456a51487de53c282d85d38eed764d3ce644
   flutter_cache_manager: ^3.3.0
   permission_handler: ^10.3.0
   path_provider: ^2.0.15
