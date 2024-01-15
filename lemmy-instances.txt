@@ -49,3 +49,4 @@ sopuli.xyz
 startrek.website
 szmer.info
 ttrpg.network
+hopandzip.com

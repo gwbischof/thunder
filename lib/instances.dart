@@ -50,4 +50,5 @@ const List<String> instances = [
   'startrek.website',
   'szmer.info',
   'ttrpg.network',
+  'hopandzip.com',
 ];

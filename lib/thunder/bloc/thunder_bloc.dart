@@ -24,6 +24,7 @@ import 'package:thunder/core/singletons/preferences.dart';
 import 'package:thunder/core/update/check_github_update.dart';
 import 'package:thunder/post/enums/post_card_metadata_item.dart';
 import 'package:thunder/utils/constants.dart';
+import 'package:thunder/globals.dart';
 
 part 'thunder_event.dart';
 
@@ -226,8 +227,8 @@ class ThunderBloc extends Bloc<ThunderEvent, ThunderState> {
 
       List<String> anonymousInstances = prefs.getStringList(LocalSettings.anonymousInstances.name) ??
           // If the user already has some accouts (i.e., an upgrade), we don't want to just throw an anonymous instance at them
-          ((await Account.accounts()).isNotEmpty ? [] : ['lemmy.ml']);
-      String currentAnonymousInstance = prefs.getString(LocalSettings.currentAnonymousInstance.name) ?? 'lemmy.ml';
+          ((await Account.accounts()).isNotEmpty ? [] : [lemmyDefault]);
+      String currentAnonymousInstance = prefs.getString(LocalSettings.currentAnonymousInstance.name) ?? lemmyDefault;
 
       return emit(state.copyWith(
         status: ThunderStatus.success,

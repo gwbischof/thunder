@@ -20,6 +20,7 @@ import 'package:thunder/utils/instance.dart';
 import 'package:thunder/utils/links.dart';
 import 'package:thunder/utils/text_input_formatter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:thunder/globals.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback popRegister;
@@ -391,7 +392,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   void _addAnonymousInstance() async {
     if (await isLemmyInstance(_instanceTextEditingController.text)) {
       final SharedPreferences prefs = (await UserPreferences.instance).sharedPreferences;
-      List<String> anonymousInstances = prefs.getStringList(LocalSettings.anonymousInstances.name) ?? ['lemmy.ml'];
+      List<String> anonymousInstances = prefs.getStringList(LocalSettings.anonymousInstances.name) ?? [lemmyDefault];
       if (anonymousInstances.contains(_instanceTextEditingController.text)) {
         setState(() {
           instanceValidated = false;
