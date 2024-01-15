@@ -87,7 +87,7 @@ void main() async {
     }
   }
 
-  final String initialInstance = (await UserPreferences.instance).sharedPreferences.getString(LocalSettings.currentAnonymousInstance.name) ?? 'lemmy.ml';
+  final String initialInstance = (await UserPreferences.instance).sharedPreferences.getString(LocalSettings.currentAnonymousInstance.name) ?? 'hopandzip.com';
   LemmyClient.instance.changeBaseUrl(initialInstance);
 
   // Perform preference migrations
