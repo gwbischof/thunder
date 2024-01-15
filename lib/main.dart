@@ -45,6 +45,7 @@ import 'package:thunder/user/bloc/user_bloc.dart';
 import 'package:thunder/utils/cache.dart';
 import 'package:thunder/utils/global_context.dart';
 import 'package:thunder/utils/preferences.dart';
+import 'package:thunder/globals.dart';
 
 late AppDatabase database;
 
