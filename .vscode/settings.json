@@ -7,4 +7,5 @@
             200
         ],
     },
+    "java.configuration.updateBuildConfiguration": "interactive",
 }
