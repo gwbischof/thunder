@@ -55,7 +55,7 @@ void main() async {
   await DB.instance.database;
 
   // Clear image cache
-  await clearExtendedImageCache();
+  //await clearExtendedImageCache();
 
   // Register dart_ping on iOS
   if (!kIsWeb && Platform.isIOS) {
