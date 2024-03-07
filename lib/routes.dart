@@ -30,13 +30,13 @@ final GoRouter router = GoRouter(
   routes: <GoRoute>[
     GoRoute(
       name: 'splash',
-      path: '/splash',
+      path: '/',
       builder: (BuildContext context, GoRouterState state) => SplashScreen(),
       routes: const <GoRoute>[],
     ),
     GoRoute(
       name: 'home',
-      path: '/',
+      path: '/home',
       builder: (BuildContext context, GoRouterState state) => Thunder(pageController: thunderPageController),
       routes: const <GoRoute>[],
     ),
