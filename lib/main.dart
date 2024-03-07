@@ -7,7 +7,7 @@ import 'package:dart_ping_ios/dart_ping_ios.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// External Packages
+// External Packagesf
 import 'package:flutter_bloc/flutter_bloc.dart';
 import "package:flutter_displaymode/flutter_displaymode.dart";
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -64,23 +64,32 @@ void main() async {
   }
 
   /// Allows the top-level notification handlers to trigger actions farther down
-  final StreamController<NotificationResponse> notificationsStreamController = StreamController<NotificationResponse>();
+  final StreamController<NotificationResponse> notificationsStreamController =
+      StreamController<NotificationResponse>();
 
   bool startupDueToGroupNotification = false;
   if (!kIsWeb && Platform.isAndroid) {
     // Initialize local notifications. Note that this doesn't request permissions or actually send any notifications.
     // It's just hooking up callbacks and settings.
-    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+        FlutterLocalNotificationsPlugin();
     // Initialize the Android-specific settings, using the splash asset as the notification icon.
-    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('splash');
-    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings, onDidReceiveNotificationResponse: (notificationResponse) => notificationsStreamController.add(notificationResponse));
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('splash');
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onDidReceiveNotificationResponse: (notificationResponse) =>
+            notificationsStreamController.add(notificationResponse));
 
     // See if Thunder is launching because a notification was tapped. If so, we want to jump right to the appropriate page.
-    final NotificationAppLaunchDetails? notificationAppLaunchDetails = await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
-    if (notificationAppLaunchDetails?.didNotificationLaunchApp == true && notificationAppLaunchDetails!.notificationResponse != null) {
+    final NotificationAppLaunchDetails? notificationAppLaunchDetails =
+        await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+    if (notificationAppLaunchDetails?.didNotificationLaunchApp == true &&
+        notificationAppLaunchDetails!.notificationResponse != null) {
       notificationsStreamController.add(notificationAppLaunchDetails.notificationResponse!);
-      startupDueToGroupNotification = notificationAppLaunchDetails.notificationResponse!.payload == repliesGroupKey;
+      startupDueToGroupNotification =
+          notificationAppLaunchDetails.notificationResponse!.payload == repliesGroupKey;
     }
 
     // Initialize background fetch (this is async and can go run on its own).
@@ -89,7 +98,10 @@ void main() async {
     }
   }
 
-  final String initialInstance = (await UserPreferences.instance).sharedPreferences.getString(LocalSettings.currentAnonymousInstance.name) ?? lemmyDefault;
+  final String initialInstance = (await UserPreferences.instance)
+          .sharedPreferences
+          .getString(LocalSettings.currentAnonymousInstance.name) ??
+      lemmyDefault;
   LemmyClient.instance.changeBaseUrl(initialInstance);
 
   // Perform preference migrations
@@ -108,7 +120,9 @@ void main() async {
   }
 
   // Register to receive BackgroundFetch events after app is terminated.
-  if (!kIsWeb && Platform.isAndroid && (prefs.getBool(LocalSettings.enableInboxNotifications.name) ?? false)) {
+  if (!kIsWeb &&
+      Platform.isAndroid &&
+      (prefs.getBool(LocalSettings.enableInboxNotifications.name) ?? false)) {
     initHeadlessBackgroundFetch();
   }
 }
@@ -164,8 +178,12 @@ class ThunderApp extends StatelessWidget {
 
           return DynamicColorBuilder(
             builder: (lightColorScheme, darkColorScheme) {
-              ThemeData theme = FlexThemeData.light(useMaterial3: true, scheme: FlexScheme.values.byName(state.selectedTheme.name));
-              ThemeData darkTheme = FlexThemeData.dark(useMaterial3: true, scheme: FlexScheme.values.byName(state.selectedTheme.name), darkIsTrueBlack: state.themeType == ThemeType.pureBlack);
+              ThemeData theme = FlexThemeData.light(
+                  useMaterial3: true, scheme: FlexScheme.values.byName(state.selectedTheme.name));
+              ThemeData darkTheme = FlexThemeData.dark(
+                  useMaterial3: true,
+                  scheme: FlexScheme.values.byName(state.selectedTheme.name),
+                  darkIsTrueBlack: state.themeType == ThemeType.pureBlack);
 
               // Enable Material You theme
               if (state.useMaterialYouTheme == true) {
@@ -201,7 +219,10 @@ class ThunderApp extends StatelessWidget {
                 ),
               );
 
-              Locale? locale = AppLocalizations.supportedLocales.where((Locale locale) => locale.languageCode == thunderBloc.state.appLanguageCode).firstOrNull;
+              Locale? locale = AppLocalizations.supportedLocales
+                  .where(
+                      (Locale locale) => locale.languageCode == thunderBloc.state.appLanguageCode)
+                  .firstOrNull;
 
               return OverlaySupport.global(
                 child: MaterialApp.router(
@@ -217,12 +238,16 @@ class ThunderApp extends StatelessWidget {
                     Locale('eo'), // Additional locale which is not officially supported: Esperanto
                   ],
                   routerConfig: router,
-                  themeMode: state.themeType == ThemeType.system ? ThemeMode.system : (state.themeType == ThemeType.light ? ThemeMode.light : ThemeMode.dark),
+                  themeMode: state.themeType == ThemeType.system
+                      ? ThemeMode.system
+                      : (state.themeType == ThemeType.light ? ThemeMode.light : ThemeMode.dark),
                   theme: theme,
                   darkTheme: darkTheme,
                   debugShowCheckedModeBanner: false,
                   scaffoldMessengerKey: GlobalContext.scaffoldMessengerKey,
-                  scrollBehavior: (state.reduceAnimations && Platform.isAndroid) ? const ScrollBehavior().copyWith(overscroll: false) : null,
+                  scrollBehavior: (state.reduceAnimations && Platform.isAndroid)
+                      ? const ScrollBehavior().copyWith(overscroll: false)
+                      : null,
                 ),
               );
             },

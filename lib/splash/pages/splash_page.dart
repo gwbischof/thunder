@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:thunder/thunder/thunder.dart';
 
-PageController thunderPageController = PageController(initialPage: 1);
+PageController thunderPageController = PageController(initialPage: 0);
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({Key? key}) : super(key: key);
