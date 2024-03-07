@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Package imports
+import 'package:flutter_bloc/flutter_bloc.dart';
 import "package:flutter_displaymode/flutter_displaymode.dart";
 import 'package:dart_ping_ios/dart_ping_ios.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -194,8 +195,12 @@ class _ThunderAppState extends State<ThunderApp> {
 
           return DynamicColorBuilder(
             builder: (lightColorScheme, darkColorScheme) {
-              ThemeData theme = FlexThemeData.light(useMaterial3: true, scheme: FlexScheme.values.byName(state.selectedTheme.name));
-              ThemeData darkTheme = FlexThemeData.dark(useMaterial3: true, scheme: FlexScheme.values.byName(state.selectedTheme.name), darkIsTrueBlack: state.themeType == ThemeType.pureBlack);
+              ThemeData theme = FlexThemeData.light(
+                  useMaterial3: true, scheme: FlexScheme.values.byName(state.selectedTheme.name));
+              ThemeData darkTheme = FlexThemeData.dark(
+                  useMaterial3: true,
+                  scheme: FlexScheme.values.byName(state.selectedTheme.name),
+                  darkIsTrueBlack: state.themeType == ThemeType.pureBlack);
 
               // Enable Material You theme
               if (state.useMaterialYouTheme == true) {
@@ -231,7 +236,10 @@ class _ThunderAppState extends State<ThunderApp> {
                 ),
               );
 
-              Locale? locale = AppLocalizations.supportedLocales.where((Locale locale) => locale.languageCode == thunderBloc.state.appLanguageCode).firstOrNull;
+              Locale? locale = AppLocalizations.supportedLocales
+                  .where(
+                      (Locale locale) => locale.languageCode == thunderBloc.state.appLanguageCode)
+                  .firstOrNull;
 
               return OverlaySupport.global(
                 child: MaterialApp.router(
@@ -247,12 +255,16 @@ class _ThunderAppState extends State<ThunderApp> {
                     Locale('eo'), // Additional locale which is not officially supported: Esperanto
                   ],
                   routerConfig: router,
-                  themeMode: state.themeType == ThemeType.system ? ThemeMode.system : (state.themeType == ThemeType.light ? ThemeMode.light : ThemeMode.dark),
+                  themeMode: state.themeType == ThemeType.system
+                      ? ThemeMode.system
+                      : (state.themeType == ThemeType.light ? ThemeMode.light : ThemeMode.dark),
                   theme: theme,
                   darkTheme: darkTheme,
                   debugShowCheckedModeBanner: false,
                   scaffoldMessengerKey: GlobalContext.scaffoldMessengerKey,
-                  scrollBehavior: (state.reduceAnimations && Platform.isAndroid) ? const ScrollBehavior().copyWith(overscroll: false) : null,
+                  scrollBehavior: (state.reduceAnimations && Platform.isAndroid)
+                      ? const ScrollBehavior().copyWith(overscroll: false)
+                      : null,
                 ),
               );
             },

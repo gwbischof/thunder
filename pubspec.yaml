@@ -172,6 +172,6 @@ flutter:
      fonts:
       - asset: fonts/Thunder.ttf
 
-flutter_native_splash:
-  image: assets/logo.png
-  color: 212123
+#flutter_native_splash:
+#  image: assets/logo.png
+#  color: 212123
