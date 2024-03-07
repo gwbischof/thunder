@@ -4,6 +4,7 @@ import 'dart:io';
 
 // Flutter imports
 import 'package:flutter/foundation.dart';
+import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -70,7 +71,7 @@ Future<void> initializeDatabase() async {
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  //FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   // Setting SystemUIMode
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -261,3 +262,68 @@ class _ThunderAppState extends State<ThunderApp> {
     );
   }
 }
+
+// ---------------- START BACKGROUND FETCH STUFF ---------------- //
+
+/// This method handles "headless" callbacks,
+/// i.e., whent the app is not running
+@pragma('vm:entry-point')
+void backgroundFetchHeadlessTask(HeadlessTask task) async {
+  if (task.timeout) {
+    BackgroundFetch.finish(task.taskId);
+    return;
+  }
+  // Run the poll!
+  await pollRepliesAndShowNotifications();
+  BackgroundFetch.finish(task.taskId);
+}
+
+/// The method initializes background fetching while the app is running
+Future<void> initBackgroundFetch() async {
+  await BackgroundFetch.configure(
+    BackgroundFetchConfig(
+      minimumFetchInterval: 15,
+      stopOnTerminate: false,
+      startOnBoot: true,
+      enableHeadless: true,
+      requiredNetworkType: NetworkType.NONE,
+      requiresBatteryNotLow: false,
+      requiresStorageNotLow: false,
+      requiresCharging: false,
+      requiresDeviceIdle: false,
+      // Uncomment this line (and set the minimumFetchInterval to 1) for quicker testing.
+      //forceAlarmManager: true,
+    ),
+    // This is the callback that handles background fetching while the app is running.
+    (String taskId) async {
+      // Run the poll!
+      await pollRepliesAndShowNotifications();
+      BackgroundFetch.finish(taskId);
+    },
+    // This is the timeout callback.
+    (String taskId) async {
+      BackgroundFetch.finish(taskId);
+    },
+  );
+}
+
+void disableBackgroundFetch() async {
+  await BackgroundFetch.configure(
+    BackgroundFetchConfig(
+      minimumFetchInterval: 15,
+      stopOnTerminate: true,
+      startOnBoot: false,
+      enableHeadless: false,
+    ),
+    () {},
+    () {},
+  );
+}
+
+// This method initializes background fetching while the app is not running
+void initHeadlessBackgroundFetch() async {
+  BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+}
+
+
+// ---------------- END BACKGROUND FETCH STUFF ---------------- //
