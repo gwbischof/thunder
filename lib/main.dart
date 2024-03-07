@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:dart_ping_ios/dart_ping_ios.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +44,7 @@ import 'package:thunder/globals.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  //FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   // Setting SystemUIMode
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -293,5 +294,6 @@ void disableBackgroundFetch() async {
 void initHeadlessBackgroundFetch() async {
   BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
 }
+
 
 // ---------------- END BACKGROUND FETCH STUFF ---------------- //
