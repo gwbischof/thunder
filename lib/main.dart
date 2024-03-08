@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:dart_ping_ios/dart_ping_ios.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// External Packagesf
+// External Packages
 import 'package:flutter_bloc/flutter_bloc.dart';
 import "package:flutter_displaymode/flutter_displaymode.dart";
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
