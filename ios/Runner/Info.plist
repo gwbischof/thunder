@@ -49,28 +49,25 @@
 		<false/>
 		<key>UIStatusBarHidden</key>
 		<false/>
-
 		<!-- Permission options for the `photos` group -->
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>We need Photos access to allow you to save media.</string>
- 		<key>NSPhotoLibraryAddUsageDescription</key>
-    	<string>We need Photos access to allow you to save media.</string>
-
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>We need Photos access to allow you to save media.</string>
 		<!-- Security compliance -->
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
-
 		<key>CFBundleURLTypes</key>
 		<array>
 			<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>com.hjiangsu.thunder</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>thunder</string>
-			</array>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLName</key>
+				<string>com.hjiangsu.thunder</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>thunder</string>
+				</array>
 			</dict>
 		</array>
 	</dict>
