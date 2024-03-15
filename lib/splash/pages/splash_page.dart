@@ -3,8 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:async';
 
+import 'package:rive/rive.dart';
+
 PageController thunderPageController = PageController(initialPage: 0);
 
+// TODO: Load background data when splash is visible.
 class SplashScreen extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -33,15 +36,14 @@ class SplashState extends State<SplashScreen> {
     return Container(
         decoration: new BoxDecoration(color: Colors.red),
         child: SizedBox(
-          height: 400,
-          child: OverflowBox(
-            minHeight: 400,
-            maxHeight: 400,
-            child: Lottie.asset(
-              'assets/animation1.json',
-              repeat: true,
-            ),
-          ),
-        ));
+            height: 800,
+            child: OverflowBox(
+              minHeight: 800,
+              maxHeight: 800,
+              child: Column(children: [
+                Lottie.asset('assets/moversmarket.json', backgroundLoading: true, repeat: false),
+                SizedBox(height: 400, width: 400, child: Lottie.asset('assets/truck.json'))
+              ]),
+            )));
   }
 }
