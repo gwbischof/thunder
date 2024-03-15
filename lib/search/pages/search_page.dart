@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -89,7 +90,8 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
 
   @override
   void initState() {
-    _currentSearchType = widget.communityToSearch == null ? SearchType.communities : SearchType.posts;
+    _currentSearchType =
+        widget.communityToSearch == null ? SearchType.communities : SearchType.posts;
     _scrollController.addListener(_onScroll);
     initPrefs();
     fetchActiveProfileAccount().then((activeProfile) => _previousUserId = activeProfile?.userId);
@@ -100,8 +102,10 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
   Future<void> initPrefs() async {
     prefs = (await UserPreferences.instance).sharedPreferences;
     setState(() {
-      sortType = SortType.values.byName(prefs!.getString("search_default_sort_type") ?? DEFAULT_SEARCH_SORT_TYPE.name);
-      final sortTypeItem = allSortTypeItems.firstWhere((sortTypeItem) => sortTypeItem.payload == sortType);
+      sortType = SortType.values
+          .byName(prefs!.getString("search_default_sort_type") ?? DEFAULT_SEARCH_SORT_TYPE.name);
+      final sortTypeItem =
+          allSortTypeItems.firstWhere((sortTypeItem) => sortTypeItem.payload == sortType);
       sortTypeIcon = sortTypeItem.icon;
       sortTypeLabel = sortTypeItem.label;
     });
@@ -164,14 +168,16 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
 
     final bool isUserLoggedIn = context.read<AuthBloc>().state.isLoggedIn;
     final String? accountInstance = context.read<AuthBloc>().state.account?.instance;
-    final String currentAnonymousInstance = context.read<ThunderBloc>().state.currentAnonymousInstance;
+    final String currentAnonymousInstance =
+        context.read<ThunderBloc>().state.currentAnonymousInstance;
 
     return BlocProvider(
       create: (context) => FeedBloc(lemmyClient: LemmyClient.instance),
       child: MultiBlocListener(
         listeners: [
           BlocListener<FeedBloc, FeedState>(listener: (context, state) => setState(() {})),
-          BlocListener<AnonymousSubscriptionsBloc, AnonymousSubscriptionsState>(listener: (context, state) {}),
+          BlocListener<AnonymousSubscriptionsBloc, AnonymousSubscriptionsState>(
+              listener: (context, state) {}),
           BlocListener<SearchBloc, SearchState>(listener: (context, state) {
             context.read<FeedBloc>().add(PopulatePostsEvent(state.posts ?? []));
           }),
@@ -180,7 +186,9 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
 
             // When account changes, that means our instance most likely changed, so reset search.
             if (state.status == AccountStatus.success &&
-                    ((activeProfile?.userId == null && _previousUserId != null) || state.personView?.person.id == activeProfile?.userId && _previousUserId != state.personView?.person.id) ||
+                    ((activeProfile?.userId == null && _previousUserId != null) ||
+                        state.personView?.person.id == activeProfile?.userId &&
+                            _previousUserId != state.personView?.person.id) ||
                 (state.favorites.length != _previousFavoritesCount && _controller.text.isEmpty)) {
               _controller.clear();
               if (context.mounted) context.read<SearchBloc>().add(ResetSearch());
@@ -215,16 +223,21 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                     child: Stack(
                       children: [
                         TextField(
-                          keyboardType: Platform.isIOS ? TextInputType.text : TextInputType.url,
+                          keyboardType:
+                              !kIsWeb && Platform.isIOS ? TextInputType.text : TextInputType.url,
                           focusNode: searchTextFieldFocus,
-                          onChanged: (value) => debounce(const Duration(milliseconds: 300), _onChange, [context, value]),
+                          onChanged: (value) => debounce(
+                              const Duration(milliseconds: 300), _onChange, [context, value]),
                           controller: _controller,
                           onTap: () {
                             HapticFeedback.selectionClick();
                           },
                           decoration: InputDecoration(
                             fillColor: Theme.of(context).searchViewTheme.backgroundColor,
-                            hintText: l10n.searchInstance(widget.communityToSearch?.community.name ?? (isUserLoggedIn ? accountInstance : currentAnonymousInstance) ?? ''),
+                            hintText: l10n.searchInstance(
+                                widget.communityToSearch?.community.name ??
+                                    (isUserLoggedIn ? accountInstance : currentAnonymousInstance) ??
+                                    ''),
                             filled: true,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(50),
@@ -285,11 +298,23 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                                     title: l10n.selectSearchType,
                                     items: [
                                       if (widget.communityToSearch == null) ...[
-                                        ListPickerItem(label: l10n.communities, payload: SearchType.communities, icon: Icons.people_rounded),
-                                        ListPickerItem(label: l10n.users, payload: SearchType.users, icon: Icons.person_rounded),
+                                        ListPickerItem(
+                                            label: l10n.communities,
+                                            payload: SearchType.communities,
+                                            icon: Icons.people_rounded),
+                                        ListPickerItem(
+                                            label: l10n.users,
+                                            payload: SearchType.users,
+                                            icon: Icons.person_rounded),
                                       ],
-                                      ListPickerItem(label: l10n.posts, payload: SearchType.posts, icon: Icons.wysiwyg_rounded),
-                                      ListPickerItem(label: l10n.comments, payload: SearchType.comments, icon: Icons.chat_rounded),
+                                      ListPickerItem(
+                                          label: l10n.posts,
+                                          payload: SearchType.posts,
+                                          icon: Icons.wysiwyg_rounded),
+                                      ListPickerItem(
+                                          label: l10n.comments,
+                                          payload: SearchType.comments,
+                                          icon: Icons.chat_rounded),
                                     ],
                                     onSelect: (value) => _setCurrentSearchType(value.payload),
                                     previouslySelected: _currentSearchType,
@@ -313,13 +338,20 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                                     builder: (ctx) => BottomSheetListPicker(
                                       title: l10n.searchPostSearchType,
                                       items: [
-                                        ListPickerItem(label: l10n.searchByText, payload: 'text', icon: Icons.wysiwyg_rounded),
-                                        ListPickerItem(label: l10n.searchByUrl, payload: 'url', icon: Icons.link_rounded),
+                                        ListPickerItem(
+                                            label: l10n.searchByText,
+                                            payload: 'text',
+                                            icon: Icons.wysiwyg_rounded),
+                                        ListPickerItem(
+                                            label: l10n.searchByUrl,
+                                            payload: 'url',
+                                            icon: Icons.link_rounded),
                                       ],
                                       onSelect: (value) {
                                         setState(() {
                                           _searchByUrl = value.payload == 'url';
-                                          _searchUrlLabel = value.payload == 'url' ? l10n.url : l10n.text;
+                                          _searchUrlLabel =
+                                              value.payload == 'url' ? l10n.url : l10n.text;
                                         });
                                         _doSearch();
                                       },
@@ -355,9 +387,18 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                                     builder: (ctx) => BottomSheetListPicker(
                                       title: l10n.selectFeedType,
                                       items: [
-                                        ListPickerItem(label: l10n.subscribed, payload: ListingType.subscribed, icon: Icons.view_list_rounded),
-                                        ListPickerItem(label: l10n.local, payload: ListingType.local, icon: Icons.home_rounded),
-                                        ListPickerItem(label: l10n.all, payload: ListingType.all, icon: Icons.grid_view_rounded)
+                                        ListPickerItem(
+                                            label: l10n.subscribed,
+                                            payload: ListingType.subscribed,
+                                            icon: Icons.view_list_rounded),
+                                        ListPickerItem(
+                                            label: l10n.local,
+                                            payload: ListingType.local,
+                                            icon: Icons.home_rounded),
+                                        ListPickerItem(
+                                            label: l10n.all,
+                                            payload: ListingType.all,
+                                            icon: Icons.grid_view_rounded)
                                       ],
                                       onSelect: (value) {
                                         setState(() {
@@ -382,13 +423,21 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                               ),
                               const SizedBox(width: 10),
                               SearchActionChip(
-                                backgroundColor: _currentCommunityFilter == null ? null : theme.colorScheme.primaryContainer.withOpacity(0.25),
+                                backgroundColor: _currentCommunityFilter == null
+                                    ? null
+                                    : theme.colorScheme.primaryContainer.withOpacity(0.25),
                                 children: [
                                   const Icon(Icons.people_rounded, size: 15),
                                   const SizedBox(width: 5),
-                                  Text(_currentCommunityFilter == null ? l10n.community : l10n.filteringBy(_currentCommunityFilterName ?? '')),
+                                  Text(_currentCommunityFilter == null
+                                      ? l10n.community
+                                      : l10n.filteringBy(_currentCommunityFilterName ?? '')),
                                   if (_currentCommunityFilter != null) const SizedBox(width: 5),
-                                  Icon(_currentCommunityFilter == null ? Icons.arrow_drop_down_rounded : Icons.close_rounded, size: _currentCommunityFilter == null ? 20 : 15),
+                                  Icon(
+                                      _currentCommunityFilter == null
+                                          ? Icons.arrow_drop_down_rounded
+                                          : Icons.close_rounded,
+                                      size: _currentCommunityFilter == null ? 20 : 15),
                                 ],
                                 onPressed: () {
                                   if (_currentCommunityFilter != null) {
@@ -398,10 +447,15 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                                     });
                                     _doSearch();
                                   } else {
-                                    showCommunityInputDialog(context, title: l10n.community, onCommunitySelected: (communityView) {
+                                    showCommunityInputDialog(context, title: l10n.community,
+                                        onCommunitySelected: (communityView) {
                                       setState(() {
                                         _currentCommunityFilter = communityView.community.id;
-                                        _currentCommunityFilterName = generateCommunityFullName(context, communityView.community.name, fetchInstanceNameFromUrl(communityView.community.actorId));
+                                        _currentCommunityFilterName = generateCommunityFullName(
+                                            context,
+                                            communityView.community.name,
+                                            fetchInstanceNameFromUrl(
+                                                communityView.community.actorId));
                                       });
                                       _doSearch();
                                     });
@@ -411,13 +465,21 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                             ],
                             const SizedBox(width: 10),
                             SearchActionChip(
-                              backgroundColor: _currentCreatorFilter == null ? null : theme.colorScheme.primaryContainer.withOpacity(0.25),
+                              backgroundColor: _currentCreatorFilter == null
+                                  ? null
+                                  : theme.colorScheme.primaryContainer.withOpacity(0.25),
                               children: [
                                 const Icon(Icons.person_rounded, size: 15),
                                 const SizedBox(width: 5),
-                                Text(_currentCreatorFilter == null ? l10n.creator : l10n.filteringBy(_currentCreatorFilterName ?? '')),
+                                Text(_currentCreatorFilter == null
+                                    ? l10n.creator
+                                    : l10n.filteringBy(_currentCreatorFilterName ?? '')),
                                 if (_currentCreatorFilter != null) const SizedBox(width: 5),
-                                Icon(_currentCreatorFilter == null ? Icons.arrow_drop_down_rounded : Icons.close_rounded, size: _currentCreatorFilter == null ? 20 : 15),
+                                Icon(
+                                    _currentCreatorFilter == null
+                                        ? Icons.arrow_drop_down_rounded
+                                        : Icons.close_rounded,
+                                    size: _currentCreatorFilter == null ? 20 : 15),
                               ],
                               onPressed: () {
                                 if (_currentCreatorFilter != null) {
@@ -427,10 +489,14 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                                   });
                                   _doSearch();
                                 } else {
-                                  showUserInputDialog(context, title: l10n.creator, onUserSelected: (personView) {
+                                  showUserInputDialog(context, title: l10n.creator,
+                                      onUserSelected: (personView) {
                                     setState(() {
                                       _currentCreatorFilter = personView.person.id;
-                                      _currentCreatorFilterName = generateUserFullName(context, personView.person.name, fetchInstanceNameFromUrl(personView.person.actorId));
+                                      _currentCreatorFilterName = generateUserFullName(
+                                          context,
+                                          personView.person.name,
+                                          fetchInstanceNameFromUrl(personView.person.actorId));
                                     });
                                     _doSearch();
                                   });
@@ -444,7 +510,8 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 60),
-                    child: _getSearchBody(context, state, isUserLoggedIn, accountInstance, currentAnonymousInstance),
+                    child: _getSearchBody(
+                        context, state, isUserLoggedIn, accountInstance, currentAnonymousInstance),
                   ),
                 ],
               ),
@@ -455,7 +522,8 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
     );
   }
 
-  Widget _getSearchBody(BuildContext context, SearchState state, bool isUserLoggedIn, String? accountInstance, String currentAnonymousInstance) {
+  Widget _getSearchBody(BuildContext context, SearchState state, bool isUserLoggedIn,
+      String? accountInstance, String currentAnonymousInstance) {
     final ThemeData theme = Theme.of(context);
     final AppLocalizations l10n = AppLocalizations.of(context)!;
     final ThunderBloc thunderBloc = context.watch<ThunderBloc>();
@@ -466,7 +534,10 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
       case SearchStatus.trending:
         return AnimatedCrossFade(
           duration: const Duration(milliseconds: 250),
-          crossFadeState: state.trendingCommunities?.isNotEmpty == true && _currentSearchType == SearchType.communities ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          crossFadeState: state.trendingCommunities?.isNotEmpty == true &&
+                  _currentSearchType == SearchType.communities
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
           firstChild: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -478,10 +549,14 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                   padding: const EdgeInsets.symmetric(horizontal: 32.0),
                   child: Text(
                     switch (_currentSearchType) {
-                      SearchType.communities => l10n.searchCommunitiesFederatedWith((isUserLoggedIn ? accountInstance : currentAnonymousInstance) ?? ''),
-                      SearchType.users => l10n.searchUsersFederatedWith((isUserLoggedIn ? accountInstance : currentAnonymousInstance) ?? ''),
-                      SearchType.comments => l10n.searchCommentsFederatedWith((isUserLoggedIn ? accountInstance : currentAnonymousInstance) ?? ''),
-                      SearchType.posts => l10n.searchPostsFederatedWith((isUserLoggedIn ? accountInstance : currentAnonymousInstance) ?? ''),
+                      SearchType.communities => l10n.searchCommunitiesFederatedWith(
+                          (isUserLoggedIn ? accountInstance : currentAnonymousInstance) ?? ''),
+                      SearchType.users => l10n.searchUsersFederatedWith(
+                          (isUserLoggedIn ? accountInstance : currentAnonymousInstance) ?? ''),
+                      SearchType.comments => l10n.searchCommentsFederatedWith(
+                          (isUserLoggedIn ? accountInstance : currentAnonymousInstance) ?? ''),
+                      SearchType.posts => l10n.searchPostsFederatedWith(
+                          (isUserLoggedIn ? accountInstance : currentAnonymousInstance) ?? ''),
                       _ => '',
                     },
                     textAlign: TextAlign.center,
@@ -509,9 +584,13 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                           shrinkWrap: true,
                           itemCount: context.read<AccountBloc>().state.favorites.length,
                           itemBuilder: (BuildContext context, int index) {
-                            CommunityView communityView = context.read<AccountBloc>().state.favorites[index];
-                            final Set<int> currentSubscriptions = context.read<AnonymousSubscriptionsBloc>().state.ids;
-                            return _buildCommunityEntry(communityView, isUserLoggedIn, currentSubscriptions, indicateFavorites: false);
+                            CommunityView communityView =
+                                context.read<AccountBloc>().state.favorites[index];
+                            final Set<int> currentSubscriptions =
+                                context.read<AnonymousSubscriptionsBloc>().state.ids;
+                            return _buildCommunityEntry(
+                                communityView, isUserLoggedIn, currentSubscriptions,
+                                indicateFavorites: false);
                           },
                         ),
                         const SizedBox(height: 20),
@@ -529,8 +608,10 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                         itemCount: state.trendingCommunities!.length,
                         itemBuilder: (BuildContext context, int index) {
                           CommunityView communityView = state.trendingCommunities![index];
-                          final Set<int> currentSubscriptions = context.read<AnonymousSubscriptionsBloc>().state.ids;
-                          return _buildCommunityEntry(communityView, isUserLoggedIn, currentSubscriptions);
+                          final Set<int> currentSubscriptions =
+                              context.read<AnonymousSubscriptionsBloc>().state.ids;
+                          return _buildCommunityEntry(
+                              communityView, isUserLoggedIn, currentSubscriptions);
                         },
                       ),
                     ],
@@ -564,7 +645,8 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (_currentSearchType != SearchType.communities && widget.communityToSearch == null) ...[
+                    if (_currentSearchType != SearchType.communities &&
+                        widget.communityToSearch == null) ...[
                       SearchActionChip(
                         children: [Text(l10n.communities)],
                         onPressed: () => _setCurrentSearchType(SearchType.communities),
@@ -618,7 +700,8 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                       : Container();
                 } else {
                   CommunityView communityView = state.communities![index];
-                  final Set<int> currentSubscriptions = context.read<AnonymousSubscriptionsBloc>().state.ids;
+                  final Set<int> currentSubscriptions =
+                      context.read<AnonymousSubscriptionsBloc>().state.ids;
                   return _buildCommunityEntry(communityView, isUserLoggedIn, currentSubscriptions);
                 }
               },
@@ -716,12 +799,15 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
     }
   }
 
-  Widget _buildCommunityEntry(CommunityView communityView, bool isUserLoggedIn, Set<int> currentSubscriptions, {bool indicateFavorites = true}) {
+  Widget _buildCommunityEntry(
+      CommunityView communityView, bool isUserLoggedIn, Set<int> currentSubscriptions,
+      {bool indicateFavorites = true}) {
     final AppLocalizations l10n = AppLocalizations.of(context)!;
 
     return Tooltip(
       excludeFromSemantics: true,
-      message: '${communityView.community.title}\n${generateCommunityFullName(context, communityView.community.name, fetchInstanceNameFromUrl(communityView.community.actorId))}',
+      message:
+          '${communityView.community.title}\n${generateCommunityFullName(context, communityView.community.name, fetchInstanceNameFromUrl(communityView.community.actorId))}',
       preferBelow: false,
       child: ListTile(
         leading: CommunityAvatar(community: communityView.community, radius: 25),
@@ -732,7 +818,8 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
         subtitle: Row(children: [
           Flexible(
             child: Text(
-              generateCommunityFullName(context, communityView.community.name, fetchInstanceNameFromUrl(communityView.community.actorId)),
+              generateCommunityFullName(context, communityView.community.name,
+                  fetchInstanceNameFromUrl(communityView.community.actorId)),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -744,26 +831,32 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
           const Icon(Icons.people_rounded, size: 16.0),
           if (indicateFavorites &&
               _getFavoriteStatus(context, communityView.community) &&
-              _getCurrentSubscriptionStatus(isUserLoggedIn, communityView, currentSubscriptions) == SubscribedType.subscribed) ...const [
+              _getCurrentSubscriptionStatus(isUserLoggedIn, communityView, currentSubscriptions) ==
+                  SubscribedType.subscribed) ...const [
             Text(' · '),
             Icon(Icons.star_rounded, size: 15),
           ]
         ]),
         trailing: IconButton(
           onPressed: () {
-            SubscribedType subscriptionStatus = _getCurrentSubscriptionStatus(isUserLoggedIn, communityView, currentSubscriptions);
+            SubscribedType subscriptionStatus =
+                _getCurrentSubscriptionStatus(isUserLoggedIn, communityView, currentSubscriptions);
             _onSubscribeIconPressed(isUserLoggedIn, context, communityView);
-            showSnackbar(subscriptionStatus == SubscribedType.notSubscribed ? l10n.addedCommunityToSubscriptions : l10n.removedCommunityFromSubscriptions);
+            showSnackbar(subscriptionStatus == SubscribedType.notSubscribed
+                ? l10n.addedCommunityToSubscriptions
+                : l10n.removedCommunityFromSubscriptions);
             context.read<AccountBloc>().add(GetAccountSubscriptions());
           },
           icon: Icon(
-            switch (_getCurrentSubscriptionStatus(isUserLoggedIn, communityView, currentSubscriptions)) {
+            switch (_getCurrentSubscriptionStatus(
+                isUserLoggedIn, communityView, currentSubscriptions)) {
               SubscribedType.notSubscribed => Icons.add_circle_outline_rounded,
               SubscribedType.pending => Icons.pending_outlined,
               SubscribedType.subscribed => Icons.remove_circle_outline_rounded,
             },
           ),
-          tooltip: switch (_getCurrentSubscriptionStatus(isUserLoggedIn, communityView, currentSubscriptions)) {
+          tooltip: switch (
+              _getCurrentSubscriptionStatus(isUserLoggedIn, communityView, currentSubscriptions)) {
             SubscribedType.notSubscribed => l10n.subscribe,
             SubscribedType.pending => l10n.unsubscribePending,
             SubscribedType.subscribed => l10n.unsubscribe,
@@ -771,7 +864,8 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
           visualDensity: VisualDensity.compact,
         ),
         onTap: () {
-          navigateToFeedPage(context, feedType: FeedType.community, communityId: communityView.community.id);
+          navigateToFeedPage(context,
+              feedType: FeedType.community, communityId: communityView.community.id);
         },
       ),
     );
@@ -779,13 +873,15 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
 
   bool _getFavoriteStatus(BuildContext context, Community community) {
     final AccountState accountState = context.read<AccountBloc>().state;
-    return accountState.favorites.any((communityView) => communityView.community.id == community.id);
+    return accountState.favorites
+        .any((communityView) => communityView.community.id == community.id);
   }
 
   Widget _buildUserEntry(PersonView personView) {
     return Tooltip(
       excludeFromSemantics: true,
-      message: '${personView.person.displayName ?? personView.person.name}\n${generateUserFullName(context, personView.person.name, fetchInstanceNameFromUrl(personView.person.actorId))}',
+      message:
+          '${personView.person.displayName ?? personView.person.name}\n${generateUserFullName(context, personView.person.name, fetchInstanceNameFromUrl(personView.person.actorId))}',
       preferBelow: false,
       child: ListTile(
         leading: UserAvatar(person: personView.person, radius: 25),
@@ -796,7 +892,8 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
         subtitle: Row(children: [
           Flexible(
             child: Text(
-              generateUserFullName(context, personView.person.name, fetchInstanceNameFromUrl(personView.person.actorId)),
+              generateUserFullName(context, personView.person.name,
+                  fetchInstanceNameFromUrl(personView.person.actorId)),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -810,15 +907,18 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
 
   Widget _buildCommentEntry(BuildContext context, CommentView commentView) {
     final AppLocalizations l10n = AppLocalizations.of(context)!;
-    final bool isOwnComment = commentView.creator.id == context.read<AuthBloc>().state.account?.userId;
+    final bool isOwnComment =
+        commentView.creator.id == context.read<AuthBloc>().state.account?.userId;
 
     return BlocProvider<post_bloc.PostBloc>(
       create: (BuildContext context) => post_bloc.PostBloc(),
       child: CommentReference(
         comment: commentView,
         now: DateTime.now().toUtc(),
-        onVoteAction: (int commentId, int voteType) => context.read<SearchBloc>().add(VoteCommentEvent(commentId: commentId, score: voteType)),
-        onSaveAction: (int commentId, bool save) => context.read<SearchBloc>().add(SaveCommentEvent(commentId: commentId, save: save)),
+        onVoteAction: (int commentId, int voteType) =>
+            context.read<SearchBloc>().add(VoteCommentEvent(commentId: commentId, score: voteType)),
+        onSaveAction: (int commentId, bool save) =>
+            context.read<SearchBloc>().add(SaveCommentEvent(commentId: commentId, save: save)),
         // Only swipe actions are supported here, and delete is not one of those, so no implementation
         onDeleteAction: (int commentId, bool deleted) {},
         // Only swipe actions are supported here, and report is not one of those, so no implementation
@@ -871,7 +971,9 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
               () async {
                 timer.cancel();
 
-                if (newDraftComment?.saveAsDraft == true && newDraftComment?.isNotEmpty == true && (!isEdit || commentView.comment.content != newDraftComment?.text)) {
+                if (newDraftComment?.saveAsDraft == true &&
+                    newDraftComment?.isNotEmpty == true &&
+                    (!isEdit || commentView.comment.content != newDraftComment?.text)) {
                   await Future.delayed(const Duration(milliseconds: 300));
                   if (context.mounted) showSnackbar(l10n.commentSavedAsDraft);
                   prefs.setString(draftId, jsonEncode(newDraftComment!.toJson()));
@@ -912,15 +1014,19 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
     );
   }
 
-  SubscribedType _getCurrentSubscriptionStatus(bool isUserLoggedIn, CommunityView communityView, Set<int> currentSubscriptions) {
+  SubscribedType _getCurrentSubscriptionStatus(
+      bool isUserLoggedIn, CommunityView communityView, Set<int> currentSubscriptions) {
     if (isUserLoggedIn) {
       return communityView.subscribed;
     }
-    bool isSubscribed = newAnonymousSubscriptions.contains(communityView.community) || (currentSubscriptions.contains(communityView.community.id) && !removedSubs.contains(communityView.community.id));
+    bool isSubscribed = newAnonymousSubscriptions.contains(communityView.community) ||
+        (currentSubscriptions.contains(communityView.community.id) &&
+            !removedSubs.contains(communityView.community.id));
     return isSubscribed ? SubscribedType.subscribed : SubscribedType.notSubscribed;
   }
 
-  void _onSubscribeIconPressed(bool isUserLoggedIn, BuildContext context, CommunityView communityView) {
+  void _onSubscribeIconPressed(
+      bool isUserLoggedIn, BuildContext context, CommunityView communityView) {
     if (isUserLoggedIn) {
       context.read<SearchBloc>().add(ChangeCommunitySubsciptionStatusEvent(
             communityId: communityView.community.id,
@@ -932,7 +1038,8 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
 
     Set<int> currentSubscriptions = context.read<AnonymousSubscriptionsBloc>().state.ids;
     setState(() {
-      if (currentSubscriptions.contains(communityView.community.id) && !removedSubs.contains(communityView.community.id)) {
+      if (currentSubscriptions.contains(communityView.community.id) &&
+          !removedSubs.contains(communityView.community.id)) {
         removedSubs.add(communityView.community.id);
       } else if (newAnonymousSubscriptions.contains(communityView.community)) {
         newAnonymousSubscriptions.remove(communityView.community);
@@ -947,7 +1054,9 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
 
   void _saveToDB() {
     if (newAnonymousSubscriptions.isNotEmpty) {
-      context.read<AnonymousSubscriptionsBloc>().add(AddSubscriptionsEvent(communities: newAnonymousSubscriptions));
+      context
+          .read<AnonymousSubscriptionsBloc>()
+          .add(AddSubscriptionsEvent(communities: newAnonymousSubscriptions));
     }
     if (removedSubs.isNotEmpty) {
       context.read<AnonymousSubscriptionsBloc>().add(DeleteSubscriptionsEvent(ids: removedSubs));
@@ -983,7 +1092,8 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
     setState(() {
       _currentSearchType = newCurrentSearchType;
 
-      if (_currentSearchType == SearchType.posts && Uri.tryParse(_controller.text)?.isAbsolute == true) {
+      if (_currentSearchType == SearchType.posts &&
+          Uri.tryParse(_controller.text)?.isAbsolute == true) {
         _searchByUrl = true;
         _searchUrlLabel = l10n.url;
       }
