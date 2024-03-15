@@ -8,4 +8,5 @@
         ],
     },
     "java.configuration.updateBuildConfiguration": "interactive",
+    "cmake.configureOnOpen": true,
 }
