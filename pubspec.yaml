@@ -138,7 +138,9 @@ flutter:
     - assets/logo_android_background.png
     - assets/logo_android_monochrome.png
     - assets/logo_background.png
-    - assets/animation1.json
+    - assets/moversmarket.json
+    - assets/truck.riv
+    - assets/truck.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
