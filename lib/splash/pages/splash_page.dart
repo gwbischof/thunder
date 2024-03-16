@@ -3,8 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:async';
 
-import 'package:rive/rive.dart';
-
 PageController thunderPageController = PageController(initialPage: 0);
 
 // TODO: Load background data when splash is visible.
