@@ -131,7 +131,6 @@ flutter:
     - assets/logo.png
     - assets/logo_background.png
     - assets/moversmarket.json
-    - assets/truck.riv
     - assets/truck.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
