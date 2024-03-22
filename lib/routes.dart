@@ -26,7 +26,7 @@ import 'package:thunder/thunder/thunder.dart';
 import 'package:thunder/user/bloc/user_settings_bloc.dart';
 import 'package:thunder/user/pages/user_settings_page.dart';
 
-PageController thunderPageController = PageController(initialPage: 0);
+PageController thunderPageController = PageController(initialPage: 2);
 
 final GoRouter router = GoRouter(
   debugLogDiagnostics: true,
@@ -40,7 +40,8 @@ final GoRouter router = GoRouter(
     GoRoute(
       name: 'home',
       path: '/home',
-      builder: (BuildContext context, GoRouterState state) => Thunder(pageController: thunderPageController),
+      builder: (BuildContext context, GoRouterState state) =>
+          Thunder(pageController: thunderPageController),
       routes: const <GoRoute>[],
     ),
     GoRoute(
@@ -54,7 +55,8 @@ final GoRouter router = GoRouter(
           builder: (context, state) {
             return BlocProvider.value(
               value: (state.extra! as List)[0] as ThunderBloc,
-              child: GeneralSettingsPage(settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
+              child: GeneralSettingsPage(
+                  settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
             );
           },
         ),
@@ -64,7 +66,8 @@ final GoRouter router = GoRouter(
           builder: (context, state) {
             return BlocProvider.value(
               value: (state.extra! as List)[0] as ThunderBloc,
-              child: FilterSettingsPage(settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
+              child: FilterSettingsPage(
+                  settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
             );
           },
         ),
@@ -74,7 +77,8 @@ final GoRouter router = GoRouter(
           builder: (context, state) {
             return BlocProvider.value(
               value: (state.extra! as List)[0] as ThunderBloc,
-              child: AppearanceSettingsPage(settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
+              child: AppearanceSettingsPage(
+                  settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
             );
           },
           routes: [
@@ -84,7 +88,9 @@ final GoRouter router = GoRouter(
               builder: (context, state) {
                 return BlocProvider.value(
                   value: (state.extra! as List)[0] as ThunderBloc,
-                  child: ThemeSettingsPage(settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
+                  child: ThemeSettingsPage(
+                      settingToHighlight:
+                          (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
                 );
               },
             ),
@@ -94,7 +100,9 @@ final GoRouter router = GoRouter(
               builder: (context, state) {
                 return BlocProvider.value(
                   value: (state.extra! as List)[0] as ThunderBloc,
-                  child: PostAppearanceSettingsPage(settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
+                  child: PostAppearanceSettingsPage(
+                      settingToHighlight:
+                          (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
                 );
               },
             ),
@@ -104,7 +112,9 @@ final GoRouter router = GoRouter(
               builder: (context, state) {
                 return BlocProvider.value(
                   value: (state.extra! as List)[0] as ThunderBloc,
-                  child: CommentAppearanceSettingsPage(settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
+                  child: CommentAppearanceSettingsPage(
+                      settingToHighlight:
+                          (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
                 );
               },
             ),
@@ -116,7 +126,8 @@ final GoRouter router = GoRouter(
           builder: (context, state) {
             return BlocProvider.value(
               value: (state.extra! as List)[0] as ThunderBloc,
-              child: GestureSettingsPage(settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
+              child: GestureSettingsPage(
+                  settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
             );
           },
         ),
@@ -136,7 +147,8 @@ final GoRouter router = GoRouter(
           builder: (context, state) {
             return BlocProvider.value(
               value: (state.extra! as List)[0] as ThunderBloc,
-              child: FabSettingsPage(settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
+              child: FabSettingsPage(
+                  settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
             );
           },
         ),
@@ -146,7 +158,8 @@ final GoRouter router = GoRouter(
           builder: (context, state) {
             return BlocProvider.value(
               value: (state.extra! as List)[0] as ThunderBloc,
-              child: AccessibilitySettingsPage(settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
+              child: AccessibilitySettingsPage(
+                  settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
             );
           },
         ),
@@ -184,7 +197,8 @@ final GoRouter router = GoRouter(
                 BlocProvider.value(value: (state.extra! as List)[1] as AccountBloc),
                 BlocProvider.value(value: (state.extra! as List)[2] as AuthBloc),
               ],
-              child: AboutSettingsPage(settingToHighlight: (state.extra! as List).elementAtOrNull(3) as LocalSettings?),
+              child: AboutSettingsPage(
+                  settingToHighlight: (state.extra! as List).elementAtOrNull(3) as LocalSettings?),
             );
           },
         ),
@@ -194,7 +208,8 @@ final GoRouter router = GoRouter(
           builder: (context, state) {
             return BlocProvider.value(
               value: (state.extra! as List)[0] as ThunderBloc,
-              child: DebugSettingsPage(settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
+              child: DebugSettingsPage(
+                  settingToHighlight: (state.extra! as List).elementAtOrNull(1) as LocalSettings?),
             );
           },
         ),
