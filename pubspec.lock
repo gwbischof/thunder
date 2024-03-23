@@ -977,8 +977,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "5639f847f7861727683c5a7dbc14f5bbd3e7194c"
-      resolved-ref: "5639f847f7861727683c5a7dbc14f5bbd3e7194c"
+      ref: c6159578abd91a2694dea45dbbd272638498c772
+      resolved-ref: c6159578abd91a2694dea45dbbd272638498c772
       url: "https://github.com/gwbischof/lemmy_api_client.git"
     source: git
     version: "0.21.0"
