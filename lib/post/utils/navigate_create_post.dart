@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lemmy_api_client/v3.dart';
 import 'package:swipeable_page_route/swipeable_page_route.dart';
 import 'package:thunder/account/bloc/account_bloc.dart';
-import 'package:thunder/community/pages/create_post_page.dart';
 import 'package:thunder/community/pages/create_request_page.dart';
 import 'package:thunder/core/models/post_view_media.dart';
 import 'package:thunder/core/singletons/lemmy_client.dart';
@@ -52,7 +51,7 @@ Future<void> navigateToCreatePostPage(
             BlocProvider<ThunderBloc>.value(value: thunderBloc),
             BlocProvider<AccountBloc>.value(value: accountBloc),
           ],
-          child: CreatePostPage(
+          child: CreateRequestPage(
             title: title,
             text: text,
             image: image,
