@@ -25,7 +25,7 @@ import 'package:thunder/core/enums/view_mode.dart';
 import 'package:thunder/core/models/post_view_media.dart';
 import 'package:thunder/core/singletons/lemmy_client.dart';
 import 'package:thunder/core/singletons/preferences.dart';
-import 'package:thunder/request/cubit/create_request_cubit.dart';
+import 'package:thunder/post/cubit/create_post_cubit.dart';
 import 'package:thunder/shared/common_markdown_body.dart';
 import 'package:thunder/shared/avatars/community_avatar.dart';
 import 'package:thunder/shared/cross_posts.dart';
@@ -93,10 +93,10 @@ class CreateRequestPage extends StatefulWidget {
   });
 
   @override
-  State<CreateRequestPage> createState() => _CreateRequestPageState();
+  State<CreateRequestPage> createState() => _CreatePostPageState();
 }
 
-class _CreateRequestPageState extends State<CreateRequestPage> {
+class _CreatePostPageState extends State<CreateRequestPage> {
   /// Holds the draft id associated with the post. This id is determined by the input parameters passed in.
   /// If [postView] is passed in, the id will be in the form 'drafts_cache-post-edit-{postView.post.id}'
   /// If [communityId] is passed in, the id will be in the form 'drafts_cache-post-create-{communityId}'
@@ -105,7 +105,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
   String draftId = '';
 
   /// Holds the current draft for the post.
-  DraftRequest draftRequest = DraftRequest();
+  DraftPost draftPost = DraftPost();
 
   /// Timer for saving the current draft to local storage
   Timer? _draftTimer;
@@ -172,61 +172,61 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
 
     // Set up any text controller listeners
     _titleTextController.addListener(() {
-      draftRequest.title = _titleTextController.text;
+      draftPost.title = _titleTextController.text;
       _validateSubmission();
     });
 
     // Set up any text controller listeners
     _pickupLocationTextController.addListener(() {
-      draftRequest.pickupLocation = _pickupLocationTextController.text;
+      draftPost.pickupLocation = _pickupLocationTextController.text;
       _validateSubmission();
     });
 
     _pickupTimeTextController.addListener(() {
-      draftRequest.pickupTime = _pickupTimeTextController.text;
+      draftPost.pickupTime = _pickupTimeTextController.text;
       _validateSubmission();
     });
 
     _pickupNotesTextController.addListener(() {
-      draftRequest.pickupNotes = _pickupNotesTextController.text;
+      draftPost.pickupNotes = _pickupNotesTextController.text;
       _validateSubmission();
     });
 
     _pickupContactTextController.addListener(() {
-      draftRequest.pickupContact = _pickupContactTextController.text;
+      draftPost.pickupContact = _pickupContactTextController.text;
       _validateSubmission();
     });
 
     _dropoffLocationTextController.addListener(() {
-      draftRequest.dropoffLocation = _dropoffLocationTextController.text;
+      draftPost.dropoffLocation = _dropoffLocationTextController.text;
       _validateSubmission();
     });
 
     _dropoffTimeTextController.addListener(() {
-      draftRequest.dropoffTime = _dropoffTimeTextController.text;
+      draftPost.dropoffTime = _dropoffTimeTextController.text;
       _validateSubmission();
     });
 
     _dropoffNotesTextController.addListener(() {
-      draftRequest.dropoffNotes = _dropoffNotesTextController.text;
+      draftPost.dropoffNotes = _dropoffNotesTextController.text;
       _validateSubmission();
     });
 
     _dropoffContactTextController.addListener(() {
-      draftRequest.dropoffContact = _dropoffContactTextController.text;
+      draftPost.dropoffContact = _dropoffContactTextController.text;
       _validateSubmission();
     });
 
     _urlTextController.addListener(() {
       url = _urlTextController.text;
-      draftRequest.url = _urlTextController.text;
+      draftPost.url = _urlTextController.text;
 
       _validateSubmission();
       debounce(const Duration(milliseconds: 1000), _updatePreview, [url]);
     });
 
     _bodyTextController.addListener(() {
-      draftRequest.text = _bodyTextController.text;
+      draftPost.text = _bodyTextController.text;
     });
 
     // Logic for pre-populating the post with the given fields
@@ -278,8 +278,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
 
     _draftTimer?.cancel();
 
-    if (draftRequest.isNotEmpty && draftRequest.saveAsDraft) {
-      sharedPreferences?.setString(draftId, jsonEncode(draftRequest.toJson()));
+    if (draftPost.isNotEmpty && draftPost.saveAsDraft) {
+      sharedPreferences?.setString(draftId, jsonEncode(draftPost.toJson()));
       showSnackbar(l10n.postSavedAsDraft);
     } else {
       sharedPreferences?.remove(draftId);
@@ -303,25 +303,25 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
       draftId = '${LocalSettings.draftsCache.name}-post-create-general';
     }
 
-    String? draftRequestJson = sharedPreferences?.getString(draftId);
+    String? draftPostJson = sharedPreferences?.getString(draftId);
 
-    if (draftRequestJson != null) {
-      draftRequest = DraftRequest.fromJson(jsonDecode(draftRequestJson));
+    if (draftPostJson != null) {
+      draftPost = DraftPost.fromJson(jsonDecode(draftPostJson));
 
-      _titleTextController.text = draftRequest.title ?? '';
-      _urlTextController.text = draftRequest.url ?? '';
-      _bodyTextController.text = draftRequest.text ?? '';
+      _titleTextController.text = draftPost.title ?? '';
+      _urlTextController.text = draftPost.url ?? '';
+      _bodyTextController.text = draftPost.text ?? '';
     }
 
     _draftTimer = Timer.periodic(const Duration(seconds: 10), (Timer t) {
-      if (draftRequest.isNotEmpty && draftRequest.saveAsDraft) {
-        sharedPreferences?.setString(draftId, jsonEncode(draftRequest.toJson()));
+      if (draftPost.isNotEmpty && draftPost.saveAsDraft) {
+        sharedPreferences?.setString(draftId, jsonEncode(draftPost.toJson()));
       } else {
         sharedPreferences?.remove(draftId);
       }
     });
 
-    if (context.mounted && draftRequest.isNotEmpty) {
+    if (context.mounted && draftPost.isNotEmpty) {
       showSnackbar(
         AppLocalizations.of(context)!.restoredPostFromDraft,
         trailingIcon: Icons.delete_forever_rounded,
@@ -359,31 +359,31 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
     final theme = Theme.of(context);
 
     return BlocProvider(
-      create: (context) => CreateRequestCubit(),
-      child: BlocConsumer<CreateRequestCubit, CreateRequestState>(
+      create: (context) => CreatePostCubit(),
+      child: BlocConsumer<CreatePostCubit, CreatePostState>(
         listener: (context, state) {
-          if (state.status == CreateRequestStatus.success && state.postViewMedia != null) {
+          if (state.status == CreatePostStatus.success && state.postViewMedia != null) {
             widget.onPostSuccess?.call(state.postViewMedia!);
             Navigator.of(context).pop();
           }
 
-          if (state.status == CreateRequestStatus.error && state.message != null) {
+          if (state.status == CreatePostStatus.error && state.message != null) {
             showSnackbar(state.message!);
-            context.read<CreateRequestCubit>().clearMessage();
+            context.read<CreatePostCubit>().clearMessage();
           }
 
           switch (state.status) {
-            case CreateRequestStatus.imageUploadSuccess:
+            case CreatePostStatus.imageUploadSuccess:
               _bodyTextController.text = _bodyTextController.text.replaceRange(
                   _bodyTextController.selection.end,
                   _bodyTextController.selection.end,
                   "![](${state.imageUrl})");
               break;
-            case CreateRequestStatus.postImageUploadSuccess:
+            case CreatePostStatus.postImageUploadSuccess:
               _urlTextController.text = state.imageUrl ?? '';
               break;
-            case CreateRequestStatus.imageUploadFailure:
-            case CreateRequestStatus.postImageUploadFailure:
+            case CreatePostStatus.imageUploadFailure:
+            case CreatePostStatus.postImageUploadFailure:
               showSnackbar(l10n.postUploadImageError,
                   leadingIcon: Icons.warning_rounded,
                   leadingIconColor: theme.colorScheme.errorContainer);
@@ -399,7 +399,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                 toolbarHeight: 70.0,
                 centerTitle: false,
                 actions: [
-                  state.status == CreateRequestStatus.submitting
+                  state.status == CreatePostStatus.submitting
                       ? const Padding(
                           padding: EdgeInsets.only(right: 20.0),
                           child:
@@ -411,9 +411,9 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                             onPressed: isSubmitButtonDisabled
                                 ? null
                                 : () {
-                                    draftRequest.saveAsDraft = false;
+                                    draftPost.saveAsDraft = false;
 
-                                    context.read<CreateRequestCubit>().createOrEditRequest(
+                                    context.read<CreatePostCubit>().createOrEditPost(
                                           communityId: communityId!,
                                           name: _titleTextController.text,
                                           body: _bodyTextController.text,
@@ -735,28 +735,28 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                     suffixIcon: IconButton(
                                       onPressed: () async {
                                         if (state.status ==
-                                            CreateRequestStatus.postImageUploadInProgress) return;
+                                            CreatePostStatus.postImageUploadInProgress) return;
 
                                         String imagePath = await selectImageToUpload();
                                         if (context.mounted)
                                           context
-                                              .read<CreateRequestCubit>()
+                                              .read<CreatePostCubit>()
                                               .uploadImage(imagePath, isPostImage: true);
                                       },
-                                      icon: state.status ==
-                                              CreateRequestStatus.postImageUploadInProgress
-                                          ? const SizedBox(
-                                              width: 20,
-                                              height: 10,
-                                              child: Center(
-                                                child: SizedBox(
-                                                  width: 18,
-                                                  height: 18,
-                                                  child: CircularProgressIndicator(),
-                                                ),
-                                              ),
-                                            )
-                                          : Icon(Icons.image, semanticLabel: l10n.uploadImage),
+                                      icon:
+                                          state.status == CreatePostStatus.postImageUploadInProgress
+                                              ? const SizedBox(
+                                                  width: 20,
+                                                  height: 10,
+                                                  child: Center(
+                                                    child: SizedBox(
+                                                      width: 18,
+                                                      height: 18,
+                                                      child: CircularProgressIndicator(),
+                                                    ),
+                                                  ),
+                                                )
+                                              : Icon(Icons.image, semanticLabel: l10n.uploadImage),
                                     ),
                                   ),
                                 ),
@@ -855,15 +855,14 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                 },
                               },
                               imageIsLoading:
-                                  state.status == CreateRequestStatus.imageUploadInProgress,
+                                  state.status == CreatePostStatus.imageUploadInProgress,
                               customImageButtonAction: () async {
-                                if (state.status == CreateRequestStatus.imageUploadInProgress)
-                                  return;
+                                if (state.status == CreatePostStatus.imageUploadInProgress) return;
 
                                 String imagePath = await selectImageToUpload();
                                 if (context.mounted) {
                                   context
-                                      .read<CreateRequestCubit>()
+                                      .read<CreatePostCubit>()
                                       .uploadImage(imagePath, isPostImage: false);
                                 }
                               },
@@ -1128,7 +1127,7 @@ class _CommunitySelectorState extends State<CommunitySelector> {
   }
 }
 
-class DraftRequest {
+class DraftPost {
   String? title;
   String? url;
   String? text;
@@ -1142,7 +1141,7 @@ class DraftRequest {
   String? dropoffContact;
   bool saveAsDraft = true;
 
-  DraftRequest(
+  DraftPost(
       {this.title,
       this.url,
       this.text,
@@ -1169,7 +1168,7 @@ class DraftRequest {
         'dropoffContact': dropoffContact,
       };
 
-  static fromJson(Map<String, dynamic> json) => DraftRequest(
+  static fromJson(Map<String, dynamic> json) => DraftPost(
         title: json['title'],
         url: json['url'],
         text: json['text'],
