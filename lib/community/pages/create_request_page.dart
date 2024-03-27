@@ -25,7 +25,7 @@ import 'package:thunder/core/enums/view_mode.dart';
 import 'package:thunder/core/models/post_view_media.dart';
 import 'package:thunder/core/singletons/lemmy_client.dart';
 import 'package:thunder/core/singletons/preferences.dart';
-import 'package:thunder/post/cubit/create_post_cubit.dart';
+import 'package:thunder/request/cubit/create_request_cubit.dart';
 import 'package:thunder/shared/common_markdown_body.dart';
 import 'package:thunder/shared/avatars/community_avatar.dart';
 import 'package:thunder/shared/cross_posts.dart';
@@ -38,7 +38,7 @@ import 'package:thunder/utils/image.dart';
 import 'package:thunder/utils/instance.dart';
 import 'package:thunder/post/utils/navigate_post.dart';
 
-class CreatePostPage extends StatefulWidget {
+class CreateRequestPage extends StatefulWidget {
   final int? communityId;
   final CommunityView? communityView;
 
@@ -71,7 +71,7 @@ class CreatePostPage extends StatefulWidget {
   /// Callback function that is triggered whenever the post is successfully created or updated
   final Function(PostViewMedia postViewMedia)? onPostSuccess;
 
-  const CreatePostPage({
+  const CreateRequestPage({
     super.key,
     required this.communityId,
     this.communityView,
@@ -93,10 +93,10 @@ class CreatePostPage extends StatefulWidget {
   });
 
   @override
-  State<CreatePostPage> createState() => _CreatePostPageState();
+  State<CreateRequestPage> createState() => _CreateRequestPageState();
 }
 
-class _CreatePostPageState extends State<CreatePostPage> {
+class _CreateRequestPageState extends State<CreateRequestPage> {
   /// Holds the draft id associated with the post. This id is determined by the input parameters passed in.
   /// If [postView] is passed in, the id will be in the form 'drafts_cache-post-edit-{postView.post.id}'
   /// If [communityId] is passed in, the id will be in the form 'drafts_cache-post-create-{communityId}'
@@ -297,7 +297,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
     } else if (widget.communityId != null) {
       draftId = '${LocalSettings.draftsCache.name}-post-create-${widget.communityId}';
     } else if (widget.communityView != null) {
-      draftId = '${LocalSettings.draftsCache.name}-post-create-${widget.communityView!.community.id}';
+      draftId =
+          '${LocalSettings.draftsCache.name}-post-create-${widget.communityView!.community.id}';
     } else {
       draftId = '${LocalSettings.draftsCache.name}-post-create-general';
     }
@@ -358,29 +359,34 @@ class _CreatePostPageState extends State<CreatePostPage> {
     final theme = Theme.of(context);
 
     return BlocProvider(
-      create: (context) => CreatePostCubit(),
-      child: BlocConsumer<CreatePostCubit, CreatePostState>(
+      create: (context) => CreateRequestCubit(),
+      child: BlocConsumer<CreateRequestCubit, CreateRequestState>(
         listener: (context, state) {
-          if (state.status == CreatePostStatus.success && state.postViewMedia != null) {
+          if (state.status == CreateRequestStatus.success && state.postViewMedia != null) {
             widget.onPostSuccess?.call(state.postViewMedia!);
             Navigator.of(context).pop();
           }
 
-          if (state.status == CreatePostStatus.error && state.message != null) {
+          if (state.status == CreateRequestStatus.error && state.message != null) {
             showSnackbar(state.message!);
-            context.read<CreatePostCubit>().clearMessage();
+            context.read<CreateRequestCubit>().clearMessage();
           }
 
           switch (state.status) {
-            case CreatePostStatus.imageUploadSuccess:
-              _bodyTextController.text = _bodyTextController.text.replaceRange(_bodyTextController.selection.end, _bodyTextController.selection.end, "![](${state.imageUrl})");
+            case CreateRequestStatus.imageUploadSuccess:
+              _bodyTextController.text = _bodyTextController.text.replaceRange(
+                  _bodyTextController.selection.end,
+                  _bodyTextController.selection.end,
+                  "![](${state.imageUrl})");
               break;
-            case CreatePostStatus.postImageUploadSuccess:
+            case CreateRequestStatus.postImageUploadSuccess:
               _urlTextController.text = state.imageUrl ?? '';
               break;
-            case CreatePostStatus.imageUploadFailure:
-            case CreatePostStatus.postImageUploadFailure:
-              showSnackbar(l10n.postUploadImageError, leadingIcon: Icons.warning_rounded, leadingIconColor: theme.colorScheme.errorContainer);
+            case CreateRequestStatus.imageUploadFailure:
+            case CreateRequestStatus.postImageUploadFailure:
+              showSnackbar(l10n.postUploadImageError,
+                  leadingIcon: Icons.warning_rounded,
+                  leadingIconColor: theme.colorScheme.errorContainer);
             default:
               break;
           }
@@ -393,10 +399,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 toolbarHeight: 70.0,
                 centerTitle: false,
                 actions: [
-                  state.status == CreatePostStatus.submitting
+                  state.status == CreateRequestStatus.submitting
                       ? const Padding(
                           padding: EdgeInsets.only(right: 20.0),
-                          child: SizedBox(width: 20, height: 10, child: CircularProgressIndicator()),
+                          child:
+                              SizedBox(width: 20, height: 10, child: CircularProgressIndicator()),
                         )
                       : Padding(
                           padding: const EdgeInsets.only(right: 8.0),
@@ -406,7 +413,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                                 : () {
                                     draftRequest.saveAsDraft = false;
 
-                                    context.read<CreatePostCubit>().createOrEditPost(
+                                    context.read<CreateRequestCubit>().createOrEditRequest(
                                           communityId: communityId!,
                                           name: _titleTextController.text,
                                           body: _bodyTextController.text,
@@ -418,7 +425,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                                   },
                             icon: Icon(
                               widget.postView != null ? Icons.edit_rounded : Icons.send_rounded,
-                              semanticLabel: widget.postView != null ? l10n.editPost : l10n.createPost,
+                              semanticLabel:
+                                  widget.postView != null ? l10n.editPost : l10n.createPost,
                             ),
                           ),
                         ),
@@ -432,358 +440,377 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     children: <Widget>[
                       Expanded(
                         child: SingleChildScrollView(
-                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-                            CommunitySelector(
-                              communityId: communityId,
-                              communityView: communityView,
-                              onCommunitySelected: (CommunityView cv) {
-                                setState(() {
-                                  communityId = cv.community.id;
-                                  communityView = cv;
-                                });
-                                _validateSubmission();
-                              },
-                            ),
-                            CommunitySelector(
-                              communityId: communityId,
-                              communityView: communityView,
-                              onCommunitySelected: (CommunityView cv) {
-                                setState(() {
-                                  communityId = cv.community.id;
-                                  communityView = cv;
-                                });
-                                _validateSubmission();
-                              },
-                            ),
-                            const SizedBox(height: 12.0),
-                            TypeAheadField<String>(
-                              suggestionsCallback: (String pattern) async {
-                                if (pattern.isEmpty) {
-                                  String? linkTitle = await _getDataFromLink(link: _urlTextController.text, updateTitleField: false);
-                                  if (linkTitle?.isNotEmpty == true) {
-                                    return [linkTitle!];
-                                  }
-                                }
-                                return const Iterable.empty();
-                              },
-                              itemBuilder: (BuildContext context, String itemData) {
-                                return ListTile(
-                                  title: Text(itemData),
-                                  subtitle: Text(l10n.suggestedTitle),
-                                );
-                              },
-                              onSuggestionSelected: (String suggestion) {
-                                _titleTextController.text = suggestion;
-                              },
-                              textFieldConfiguration: TextFieldConfiguration(
-                                controller: _titleTextController,
-                                decoration: InputDecoration(helperText: l10n.postTitle),
-                              ),
-                              hideOnEmpty: true,
-                              hideOnLoading: true,
-                              hideOnError: true,
-                            ),
-                            const SizedBox(height: 10),
-                            TypeAheadField<String>(
-                              suggestionsCallback: (String pattern) async {
-                                if (pattern.isEmpty) {
-                                  String? linkTitle = await _getDataFromLink(link: _urlTextController.text, updateTitleField: false);
-                                  if (linkTitle?.isNotEmpty == true) {
-                                    return [linkTitle!];
-                                  }
-                                }
-                                return const Iterable.empty();
-                              },
-                              itemBuilder: (BuildContext context, String itemData) {
-                                return ListTile(
-                                  title: Text(itemData),
-                                  subtitle: Text(l10n.suggestedTitle),
-                                );
-                              },
-                              onSuggestionSelected: (String suggestion) {
-                                _pickupLocationTextController.text = suggestion;
-                              },
-                              textFieldConfiguration: TextFieldConfiguration(
-                                controller: _pickupLocationTextController,
-                                decoration: InputDecoration(helperText: "Pickup location"),
-                              ),
-                              hideOnEmpty: true,
-                              hideOnLoading: true,
-                              hideOnError: true,
-                            ),
-                            const SizedBox(height: 10),
-                            TypeAheadField<String>(
-                              suggestionsCallback: (String pattern) async {
-                                if (pattern.isEmpty) {
-                                  String? linkTitle = await _getDataFromLink(link: _urlTextController.text, updateTitleField: false);
-                                  if (linkTitle?.isNotEmpty == true) {
-                                    return [linkTitle!];
-                                  }
-                                }
-                                return const Iterable.empty();
-                              },
-                              itemBuilder: (BuildContext context, String itemData) {
-                                return ListTile(
-                                  title: Text(itemData),
-                                  subtitle: Text(l10n.suggestedTitle),
-                                );
-                              },
-                              onSuggestionSelected: (String suggestion) {
-                                _pickupTimeTextController.text = suggestion;
-                              },
-                              textFieldConfiguration: TextFieldConfiguration(
-                                controller: _pickupTimeTextController,
-                                decoration: InputDecoration(helperText: "Pickup date/time"),
-                              ),
-                              hideOnEmpty: true,
-                              hideOnLoading: true,
-                              hideOnError: true,
-                            ),
-                            const SizedBox(height: 10),
-                            TypeAheadField<String>(
-                              suggestionsCallback: (String pattern) async {
-                                if (pattern.isEmpty) {
-                                  String? linkTitle = await _getDataFromLink(link: _urlTextController.text, updateTitleField: false);
-                                  if (linkTitle?.isNotEmpty == true) {
-                                    return [linkTitle!];
-                                  }
-                                }
-                                return const Iterable.empty();
-                              },
-                              itemBuilder: (BuildContext context, String itemData) {
-                                return ListTile(
-                                  title: Text(itemData),
-                                  subtitle: Text(l10n.suggestedTitle),
-                                );
-                              },
-                              onSuggestionSelected: (String suggestion) {
-                                _pickupNotesTextController.text = suggestion;
-                              },
-                              textFieldConfiguration: TextFieldConfiguration(
-                                controller: _pickupNotesTextController,
-                                decoration: InputDecoration(helperText: "Pickup notes"),
-                              ),
-                              hideOnEmpty: true,
-                              hideOnLoading: true,
-                              hideOnError: true,
-                            ),
-                            const SizedBox(height: 10),
-                            TypeAheadField<String>(
-                              suggestionsCallback: (String pattern) async {
-                                if (pattern.isEmpty) {
-                                  String? linkTitle = await _getDataFromLink(link: _urlTextController.text, updateTitleField: false);
-                                  if (linkTitle?.isNotEmpty == true) {
-                                    return [linkTitle!];
-                                  }
-                                }
-                                return const Iterable.empty();
-                              },
-                              itemBuilder: (BuildContext context, String itemData) {
-                                return ListTile(
-                                  title: Text(itemData),
-                                  subtitle: Text(l10n.suggestedTitle),
-                                );
-                              },
-                              onSuggestionSelected: (String suggestion) {
-                                _pickupContactTextController.text = suggestion;
-                              },
-                              textFieldConfiguration: TextFieldConfiguration(
-                                controller: _pickupContactTextController,
-                                decoration: InputDecoration(helperText: "Pickup contact"),
-                              ),
-                              hideOnEmpty: true,
-                              hideOnLoading: true,
-                              hideOnError: true,
-                            ),
-                            const SizedBox(height: 10),
-                            TypeAheadField<String>(
-                              suggestionsCallback: (String pattern) async {
-                                if (pattern.isEmpty) {
-                                  String? linkTitle = await _getDataFromLink(link: _urlTextController.text, updateTitleField: false);
-                                  if (linkTitle?.isNotEmpty == true) {
-                                    return [linkTitle!];
-                                  }
-                                }
-                                return const Iterable.empty();
-                              },
-                              itemBuilder: (BuildContext context, String itemData) {
-                                return ListTile(
-                                  title: Text(itemData),
-                                  subtitle: Text(l10n.suggestedTitle),
-                                );
-                              },
-                              onSuggestionSelected: (String suggestion) {
-                                _dropoffLocationTextController.text = suggestion;
-                              },
-                              textFieldConfiguration: TextFieldConfiguration(
-                                controller: _dropoffLocationTextController,
-                                decoration: InputDecoration(helperText: "Drop-off location"),
-                              ),
-                              hideOnEmpty: true,
-                              hideOnLoading: true,
-                              hideOnError: true,
-                            ),
-                            const SizedBox(height: 10),
-                            TypeAheadField<String>(
-                              suggestionsCallback: (String pattern) async {
-                                if (pattern.isEmpty) {
-                                  String? linkTitle = await _getDataFromLink(link: _urlTextController.text, updateTitleField: false);
-                                  if (linkTitle?.isNotEmpty == true) {
-                                    return [linkTitle!];
-                                  }
-                                }
-                                return const Iterable.empty();
-                              },
-                              itemBuilder: (BuildContext context, String itemData) {
-                                return ListTile(
-                                  title: Text(itemData),
-                                  subtitle: Text(l10n.suggestedTitle),
-                                );
-                              },
-                              onSuggestionSelected: (String suggestion) {
-                                _dropoffTimeTextController.text = suggestion;
-                              },
-                              textFieldConfiguration: TextFieldConfiguration(
-                                controller: _dropoffTimeTextController,
-                                decoration: InputDecoration(helperText: "Drop-off date/time"),
-                              ),
-                              hideOnEmpty: true,
-                              hideOnLoading: true,
-                              hideOnError: true,
-                            ),
-                            const SizedBox(height: 10),
-                            TypeAheadField<String>(
-                              suggestionsCallback: (String pattern) async {
-                                if (pattern.isEmpty) {
-                                  String? linkTitle = await _getDataFromLink(link: _urlTextController.text, updateTitleField: false);
-                                  if (linkTitle?.isNotEmpty == true) {
-                                    return [linkTitle!];
-                                  }
-                                }
-                                return const Iterable.empty();
-                              },
-                              itemBuilder: (BuildContext context, String itemData) {
-                                return ListTile(
-                                  title: Text(itemData),
-                                  subtitle: Text(l10n.suggestedTitle),
-                                );
-                              },
-                              onSuggestionSelected: (String suggestion) {
-                                _dropoffNotesTextController.text = suggestion;
-                              },
-                              textFieldConfiguration: TextFieldConfiguration(
-                                controller: _dropoffNotesTextController,
-                                decoration: InputDecoration(helperText: "Drop-off notes"),
-                              ),
-                              hideOnEmpty: true,
-                              hideOnLoading: true,
-                              hideOnError: true,
-                            ),
-                            const SizedBox(height: 10),
-                            TypeAheadField<String>(
-                              suggestionsCallback: (String pattern) async {
-                                if (pattern.isEmpty) {
-                                  String? linkTitle = await _getDataFromLink(link: _urlTextController.text, updateTitleField: false);
-                                  if (linkTitle?.isNotEmpty == true) {
-                                    return [linkTitle!];
-                                  }
-                                }
-                                return const Iterable.empty();
-                              },
-                              itemBuilder: (BuildContext context, String itemData) {
-                                return ListTile(
-                                  title: Text(itemData),
-                                  subtitle: Text(l10n.suggestedTitle),
-                                );
-                              },
-                              onSuggestionSelected: (String suggestion) {
-                                _dropoffContactTextController.text = suggestion;
-                              },
-                              textFieldConfiguration: TextFieldConfiguration(
-                                controller: _dropoffContactTextController,
-                                decoration: InputDecoration(helperText: "Drop-off contact"),
-                              ),
-                              hideOnEmpty: true,
-                              hideOnLoading: true,
-                              hideOnError: true,
-                            ),
-                            const SizedBox(height: 10),
-                            TextFormField(
-                              controller: _urlTextController,
-                              decoration: InputDecoration(
-                                helperText: l10n.postURL,
-                                errorText: urlError,
-                                suffixIcon: IconButton(
-                                  onPressed: () async {
-                                    if (state.status == CreatePostStatus.postImageUploadInProgress) return;
-
-                                    String imagePath = await selectImageToUpload();
-                                    if (context.mounted) context.read<CreatePostCubit>().uploadImage(imagePath, isPostImage: true);
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                CommunitySelector(
+                                  communityId: communityId,
+                                  communityView: communityView,
+                                  onCommunitySelected: (CommunityView cv) {
+                                    setState(() {
+                                      communityId = cv.community.id;
+                                      communityView = cv;
+                                    });
+                                    _validateSubmission();
                                   },
-                                  icon: state.status == CreatePostStatus.postImageUploadInProgress
-                                      ? const SizedBox(
-                                          width: 20,
-                                          height: 10,
-                                          child: Center(
-                                            child: SizedBox(
-                                              width: 18,
-                                              height: 18,
-                                              child: CircularProgressIndicator(),
-                                            ),
-                                          ),
-                                        )
-                                      : Icon(Icons.image, semanticLabel: l10n.uploadImage),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Visibility(
-                              visible: url.isNotEmpty,
-                              child: LinkPreviewCard(
-                                hideNsfw: false,
-                                scrapeMissingPreviews: false,
-                                originURL: url,
-                                mediaURL: isImageUrl(url) ? url : null,
-                                mediaHeight: null,
-                                mediaWidth: null,
-                                showFullHeightImages: false,
-                                edgeToEdgeImages: false,
-                                viewMode: ViewMode.comfortable,
-                                postId: null,
-                                markPostReadOnMediaView: false,
-                                isUserLoggedIn: true,
-                              ),
-                            ),
-                            if (crossPosts.isNotEmpty && widget.postView == null)
-                              Visibility(
-                                visible: url.isNotEmpty,
-                                child: CrossPosts(
-                                  crossPosts: crossPosts,
-                                  isNewPost: true,
+                                CommunitySelector(
+                                  communityId: communityId,
+                                  communityView: communityView,
+                                  onCommunitySelected: (CommunityView cv) {
+                                    setState(() {
+                                      communityId = cv.community.id;
+                                      communityView = cv;
+                                    });
+                                    _validateSubmission();
+                                  },
                                 ),
-                              ),
-                            const SizedBox(height: 10),
-                            showPreview
-                                ? Container(
-                                    constraints: const BoxConstraints(minWidth: double.infinity),
-                                    decoration: BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(10)),
-                                    padding: const EdgeInsets.all(12),
-                                    child: SingleChildScrollView(
-                                      child: CommonMarkdownBody(
-                                        body: _bodyTextController.text,
-                                        isComment: true,
-                                      ),
-                                    ),
-                                  )
-                                : MarkdownTextInputField(
-                                    controller: _bodyTextController,
-                                    focusNode: _bodyFocusNode,
-                                    label: "Description of work",
-                                    minLines: 8,
-                                    maxLines: null,
-                                    textStyle: theme.textTheme.bodyLarge,
+                                const SizedBox(height: 12.0),
+                                TypeAheadField<String>(
+                                  suggestionsCallback: (String pattern) async {
+                                    if (pattern.isEmpty) {
+                                      String? linkTitle = await _getDataFromLink(
+                                          link: _urlTextController.text, updateTitleField: false);
+                                      if (linkTitle?.isNotEmpty == true) {
+                                        return [linkTitle!];
+                                      }
+                                    }
+                                    return const Iterable.empty();
+                                  },
+                                  itemBuilder: (BuildContext context, String itemData) {
+                                    return ListTile(
+                                      title: Text(itemData),
+                                      subtitle: Text(l10n.suggestedTitle),
+                                    );
+                                  },
+                                  onSuggestionSelected: (String suggestion) {
+                                    _titleTextController.text = suggestion;
+                                  },
+                                  textFieldConfiguration: TextFieldConfiguration(
+                                    controller: _titleTextController,
+                                    decoration: InputDecoration(helperText: l10n.postTitle),
                                   ),
-                          ]),
+                                  hideOnEmpty: true,
+                                  hideOnLoading: true,
+                                  hideOnError: true,
+                                ),
+                                const SizedBox(height: 10),
+                                TypeAheadField<String>(
+                                  suggestionsCallback: (String pattern) async {
+                                    if (pattern.isEmpty) {
+                                      String? linkTitle = await _getDataFromLink(
+                                          link: _urlTextController.text, updateTitleField: false);
+                                      if (linkTitle?.isNotEmpty == true) {
+                                        return [linkTitle!];
+                                      }
+                                    }
+                                    return const Iterable.empty();
+                                  },
+                                  itemBuilder: (BuildContext context, String itemData) {
+                                    return ListTile(
+                                      title: Text(itemData),
+                                      subtitle: Text(l10n.suggestedTitle),
+                                    );
+                                  },
+                                  onSuggestionSelected: (String suggestion) {
+                                    _pickupLocationTextController.text = suggestion;
+                                  },
+                                  textFieldConfiguration: TextFieldConfiguration(
+                                    controller: _pickupLocationTextController,
+                                    decoration: InputDecoration(helperText: "Pickup location"),
+                                  ),
+                                  hideOnEmpty: true,
+                                  hideOnLoading: true,
+                                  hideOnError: true,
+                                ),
+                                const SizedBox(height: 10),
+                                TypeAheadField<String>(
+                                  suggestionsCallback: (String pattern) async {
+                                    if (pattern.isEmpty) {
+                                      String? linkTitle = await _getDataFromLink(
+                                          link: _urlTextController.text, updateTitleField: false);
+                                      if (linkTitle?.isNotEmpty == true) {
+                                        return [linkTitle!];
+                                      }
+                                    }
+                                    return const Iterable.empty();
+                                  },
+                                  itemBuilder: (BuildContext context, String itemData) {
+                                    return ListTile(
+                                      title: Text(itemData),
+                                      subtitle: Text(l10n.suggestedTitle),
+                                    );
+                                  },
+                                  onSuggestionSelected: (String suggestion) {
+                                    _pickupTimeTextController.text = suggestion;
+                                  },
+                                  textFieldConfiguration: TextFieldConfiguration(
+                                    controller: _pickupTimeTextController,
+                                    decoration: InputDecoration(helperText: "Pickup date/time"),
+                                  ),
+                                  hideOnEmpty: true,
+                                  hideOnLoading: true,
+                                  hideOnError: true,
+                                ),
+                                const SizedBox(height: 10),
+                                TypeAheadField<String>(
+                                  suggestionsCallback: (String pattern) async {
+                                    if (pattern.isEmpty) {
+                                      String? linkTitle = await _getDataFromLink(
+                                          link: _urlTextController.text, updateTitleField: false);
+                                      if (linkTitle?.isNotEmpty == true) {
+                                        return [linkTitle!];
+                                      }
+                                    }
+                                    return const Iterable.empty();
+                                  },
+                                  itemBuilder: (BuildContext context, String itemData) {
+                                    return ListTile(
+                                      title: Text(itemData),
+                                      subtitle: Text(l10n.suggestedTitle),
+                                    );
+                                  },
+                                  onSuggestionSelected: (String suggestion) {
+                                    _pickupNotesTextController.text = suggestion;
+                                  },
+                                  textFieldConfiguration: TextFieldConfiguration(
+                                    controller: _pickupNotesTextController,
+                                    decoration: InputDecoration(helperText: "Pickup notes"),
+                                  ),
+                                  hideOnEmpty: true,
+                                  hideOnLoading: true,
+                                  hideOnError: true,
+                                ),
+                                const SizedBox(height: 10),
+                                TypeAheadField<String>(
+                                  suggestionsCallback: (String pattern) async {
+                                    if (pattern.isEmpty) {
+                                      String? linkTitle = await _getDataFromLink(
+                                          link: _urlTextController.text, updateTitleField: false);
+                                      if (linkTitle?.isNotEmpty == true) {
+                                        return [linkTitle!];
+                                      }
+                                    }
+                                    return const Iterable.empty();
+                                  },
+                                  itemBuilder: (BuildContext context, String itemData) {
+                                    return ListTile(
+                                      title: Text(itemData),
+                                      subtitle: Text(l10n.suggestedTitle),
+                                    );
+                                  },
+                                  onSuggestionSelected: (String suggestion) {
+                                    _pickupContactTextController.text = suggestion;
+                                  },
+                                  textFieldConfiguration: TextFieldConfiguration(
+                                    controller: _pickupContactTextController,
+                                    decoration: InputDecoration(helperText: "Pickup contact"),
+                                  ),
+                                  hideOnEmpty: true,
+                                  hideOnLoading: true,
+                                  hideOnError: true,
+                                ),
+                                const SizedBox(height: 10),
+                                TypeAheadField<String>(
+                                  suggestionsCallback: (String pattern) async {
+                                    if (pattern.isEmpty) {
+                                      String? linkTitle = await _getDataFromLink(
+                                          link: _urlTextController.text, updateTitleField: false);
+                                      if (linkTitle?.isNotEmpty == true) {
+                                        return [linkTitle!];
+                                      }
+                                    }
+                                    return const Iterable.empty();
+                                  },
+                                  itemBuilder: (BuildContext context, String itemData) {
+                                    return ListTile(
+                                      title: Text(itemData),
+                                      subtitle: Text(l10n.suggestedTitle),
+                                    );
+                                  },
+                                  onSuggestionSelected: (String suggestion) {
+                                    _dropoffLocationTextController.text = suggestion;
+                                  },
+                                  textFieldConfiguration: TextFieldConfiguration(
+                                    controller: _dropoffLocationTextController,
+                                    decoration: InputDecoration(helperText: "Drop-off location"),
+                                  ),
+                                  hideOnEmpty: true,
+                                  hideOnLoading: true,
+                                  hideOnError: true,
+                                ),
+                                const SizedBox(height: 10),
+                                TypeAheadField<String>(
+                                  suggestionsCallback: (String pattern) async {
+                                    if (pattern.isEmpty) {
+                                      String? linkTitle = await _getDataFromLink(
+                                          link: _urlTextController.text, updateTitleField: false);
+                                      if (linkTitle?.isNotEmpty == true) {
+                                        return [linkTitle!];
+                                      }
+                                    }
+                                    return const Iterable.empty();
+                                  },
+                                  itemBuilder: (BuildContext context, String itemData) {
+                                    return ListTile(
+                                      title: Text(itemData),
+                                      subtitle: Text(l10n.suggestedTitle),
+                                    );
+                                  },
+                                  onSuggestionSelected: (String suggestion) {
+                                    _dropoffTimeTextController.text = suggestion;
+                                  },
+                                  textFieldConfiguration: TextFieldConfiguration(
+                                    controller: _dropoffTimeTextController,
+                                    decoration: InputDecoration(helperText: "Drop-off date/time"),
+                                  ),
+                                  hideOnEmpty: true,
+                                  hideOnLoading: true,
+                                  hideOnError: true,
+                                ),
+                                const SizedBox(height: 10),
+                                TypeAheadField<String>(
+                                  suggestionsCallback: (String pattern) async {
+                                    if (pattern.isEmpty) {
+                                      String? linkTitle = await _getDataFromLink(
+                                          link: _urlTextController.text, updateTitleField: false);
+                                      if (linkTitle?.isNotEmpty == true) {
+                                        return [linkTitle!];
+                                      }
+                                    }
+                                    return const Iterable.empty();
+                                  },
+                                  itemBuilder: (BuildContext context, String itemData) {
+                                    return ListTile(
+                                      title: Text(itemData),
+                                      subtitle: Text(l10n.suggestedTitle),
+                                    );
+                                  },
+                                  onSuggestionSelected: (String suggestion) {
+                                    _dropoffNotesTextController.text = suggestion;
+                                  },
+                                  textFieldConfiguration: TextFieldConfiguration(
+                                    controller: _dropoffNotesTextController,
+                                    decoration: InputDecoration(helperText: "Drop-off notes"),
+                                  ),
+                                  hideOnEmpty: true,
+                                  hideOnLoading: true,
+                                  hideOnError: true,
+                                ),
+                                const SizedBox(height: 10),
+                                TypeAheadField<String>(
+                                  suggestionsCallback: (String pattern) async {
+                                    if (pattern.isEmpty) {
+                                      String? linkTitle = await _getDataFromLink(
+                                          link: _urlTextController.text, updateTitleField: false);
+                                      if (linkTitle?.isNotEmpty == true) {
+                                        return [linkTitle!];
+                                      }
+                                    }
+                                    return const Iterable.empty();
+                                  },
+                                  itemBuilder: (BuildContext context, String itemData) {
+                                    return ListTile(
+                                      title: Text(itemData),
+                                      subtitle: Text(l10n.suggestedTitle),
+                                    );
+                                  },
+                                  onSuggestionSelected: (String suggestion) {
+                                    _dropoffContactTextController.text = suggestion;
+                                  },
+                                  textFieldConfiguration: TextFieldConfiguration(
+                                    controller: _dropoffContactTextController,
+                                    decoration: InputDecoration(helperText: "Drop-off contact"),
+                                  ),
+                                  hideOnEmpty: true,
+                                  hideOnLoading: true,
+                                  hideOnError: true,
+                                ),
+                                const SizedBox(height: 10),
+                                TextFormField(
+                                  controller: _urlTextController,
+                                  decoration: InputDecoration(
+                                    helperText: l10n.postURL,
+                                    errorText: urlError,
+                                    suffixIcon: IconButton(
+                                      onPressed: () async {
+                                        if (state.status ==
+                                            CreateRequestStatus.postImageUploadInProgress) return;
+
+                                        String imagePath = await selectImageToUpload();
+                                        if (context.mounted)
+                                          context
+                                              .read<CreateRequestCubit>()
+                                              .uploadImage(imagePath, isPostImage: true);
+                                      },
+                                      icon: state.status ==
+                                              CreateRequestStatus.postImageUploadInProgress
+                                          ? const SizedBox(
+                                              width: 20,
+                                              height: 10,
+                                              child: Center(
+                                                child: SizedBox(
+                                                  width: 18,
+                                                  height: 18,
+                                                  child: CircularProgressIndicator(),
+                                                ),
+                                              ),
+                                            )
+                                          : Icon(Icons.image, semanticLabel: l10n.uploadImage),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Visibility(
+                                  visible: url.isNotEmpty,
+                                  child: LinkPreviewCard(
+                                    hideNsfw: false,
+                                    scrapeMissingPreviews: false,
+                                    originURL: url,
+                                    mediaURL: isImageUrl(url) ? url : null,
+                                    mediaHeight: null,
+                                    mediaWidth: null,
+                                    showFullHeightImages: false,
+                                    edgeToEdgeImages: false,
+                                    viewMode: ViewMode.comfortable,
+                                    postId: null,
+                                    markPostReadOnMediaView: false,
+                                    isUserLoggedIn: true,
+                                  ),
+                                ),
+                                if (crossPosts.isNotEmpty && widget.postView == null)
+                                  Visibility(
+                                    visible: url.isNotEmpty,
+                                    child: CrossPosts(
+                                      crossPosts: crossPosts,
+                                      isNewPost: true,
+                                    ),
+                                  ),
+                                const SizedBox(height: 10),
+                                showPreview
+                                    ? Container(
+                                        constraints:
+                                            const BoxConstraints(minWidth: double.infinity),
+                                        decoration: BoxDecoration(
+                                            border: Border.all(color: Colors.grey),
+                                            borderRadius: BorderRadius.circular(10)),
+                                        padding: const EdgeInsets.all(12),
+                                        child: SingleChildScrollView(
+                                          child: CommonMarkdownBody(
+                                            body: _bodyTextController.text,
+                                            isComment: true,
+                                          ),
+                                        ),
+                                      )
+                                    : MarkdownTextInputField(
+                                        controller: _bodyTextController,
+                                        focusNode: _bodyFocusNode,
+                                        label: "Description of work",
+                                        minLines: 8,
+                                        maxLines: null,
+                                        textStyle: theme.textTheme.bodyLarge,
+                                      ),
+                              ]),
                         ),
                       ),
                       const Divider(),
@@ -809,24 +836,36 @@ class _CreatePostPageState extends State<CreatePostPage> {
                               ],
                               customTapActions: {
                                 MarkdownType.username: () {
-                                  showUserInputDialog(context, title: l10n.username, onUserSelected: (person) {
-                                    _bodyTextController.text = _bodyTextController.text.replaceRange(_bodyTextController.selection.end, _bodyTextController.selection.end,
+                                  showUserInputDialog(context, title: l10n.username,
+                                      onUserSelected: (person) {
+                                    _bodyTextController.text = _bodyTextController.text.replaceRange(
+                                        _bodyTextController.selection.end,
+                                        _bodyTextController.selection.end,
                                         '[@${person.person.name}@${fetchInstanceNameFromUrl(person.person.actorId)}](${person.person.actorId})');
                                   });
                                 },
                                 MarkdownType.community: () {
-                                  showCommunityInputDialog(context, title: l10n.community, onCommunitySelected: (community) {
-                                    _bodyTextController.text = _bodyTextController.text.replaceRange(_bodyTextController.selection.end, _bodyTextController.selection.end,
+                                  showCommunityInputDialog(context, title: l10n.community,
+                                      onCommunitySelected: (community) {
+                                    _bodyTextController.text = _bodyTextController.text.replaceRange(
+                                        _bodyTextController.selection.end,
+                                        _bodyTextController.selection.end,
                                         '[@${community.community.title}@${fetchInstanceNameFromUrl(community.community.actorId)}](${community.community.actorId})');
                                   });
                                 },
                               },
-                              imageIsLoading: state.status == CreatePostStatus.imageUploadInProgress,
+                              imageIsLoading:
+                                  state.status == CreateRequestStatus.imageUploadInProgress,
                               customImageButtonAction: () async {
-                                if (state.status == CreatePostStatus.imageUploadInProgress) return;
+                                if (state.status == CreateRequestStatus.imageUploadInProgress)
+                                  return;
 
                                 String imagePath = await selectImageToUpload();
-                                if (context.mounted) context.read<CreatePostCubit>().uploadImage(imagePath, isPostImage: false);
+                                if (context.mounted) {
+                                  context
+                                      .read<CreateRequestCubit>()
+                                      .uploadImage(imagePath, isPostImage: false);
+                                }
                               },
                             ),
                           ),
@@ -835,12 +874,14 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             child: IconButton(
                               onPressed: () {
                                 if (!showPreview) {
-                                  setState(() => wasKeyboardVisible = keyboardVisibilityController.isVisible);
+                                  setState(() =>
+                                      wasKeyboardVisible = keyboardVisibilityController.isVisible);
                                   FocusManager.instance.primaryFocus?.unfocus();
                                 }
 
                                 setState(() => showPreview = !showPreview);
-                                if (!showPreview && wasKeyboardVisible) _bodyFocusNode.requestFocus();
+                                if (!showPreview && wasKeyboardVisible)
+                                  _bodyFocusNode.requestFocus();
                               },
                               icon: Icon(
                                 showPreview ? Icons.visibility_outlined : Icons.visibility,
@@ -848,7 +889,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                                 semanticLabel: l10n.postTogglePreview,
                               ),
                               visualDensity: const VisualDensity(horizontal: 1.0, vertical: 1.0),
-                              style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.secondary),
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: theme.colorScheme.secondary),
                             ),
                           ),
                         ],
@@ -1101,7 +1143,17 @@ class DraftRequest {
   bool saveAsDraft = true;
 
   DraftRequest(
-      {this.title, this.url, this.text, this.pickupLocation, this.pickupTime, this.pickupNotes, this.pickupContact, this.dropoffLocation, this.dropoffTime, this.dropoffNotes, this.dropoffContact});
+      {this.title,
+      this.url,
+      this.text,
+      this.pickupLocation,
+      this.pickupTime,
+      this.pickupNotes,
+      this.pickupContact,
+      this.dropoffLocation,
+      this.dropoffTime,
+      this.dropoffNotes,
+      this.dropoffContact});
 
   Map<String, dynamic> toJson() => {
         'title': title,
@@ -1131,5 +1183,6 @@ class DraftRequest {
         dropoffContact: json['dropoffContact'],
       );
 
-  bool get isNotEmpty => title?.isNotEmpty == true || url?.isNotEmpty == true || text?.isNotEmpty == true;
+  bool get isNotEmpty =>
+      title?.isNotEmpty == true || url?.isNotEmpty == true || text?.isNotEmpty == true;
 }
