@@ -116,6 +116,14 @@ Future<PostView> createPost({
   bool? nsfw,
   int? postIdBeingEdited,
   int? languageId,
+  String? pickupLocation,
+  String? pickupTime,
+  String? pickupNotes,
+  String? pickupContact,
+  String? dropoffLocation,
+  String? dropoffTime,
+  String? dropoffNotes,
+  String? dropoffContact,
 }) async {
   Account? account = await fetchActiveProfileAccount();
   LemmyApiV3 lemmy = LemmyClient.instance.lemmyApiV3;
@@ -124,7 +132,7 @@ Future<PostView> createPost({
 
   PostResponse postResponse;
   if (postIdBeingEdited != null) {
-    postResponse = await lemmy.run(EditPost(
+    postResponse = await lemmy.run(EditRequest(
       auth: account!.jwt!,
       name: name,
       body: body,
@@ -133,9 +141,17 @@ Future<PostView> createPost({
       nsfw: nsfw,
       postId: postIdBeingEdited,
       languageId: languageId,
+      pickupLocation: pickupLocation,
+      pickupTime: pickupTime,
+      pickupNotes: pickupNotes,
+      pickupContact: pickupContact,
+      dropoffLocation: dropoffLocation,
+      dropoffTime: dropoffTime,
+      dropoffNotes: dropoffNotes,
+      dropoffContact: dropoffContact,
     ));
   } else {
-    postResponse = await lemmy.run(CreatePost(
+    postResponse = await lemmy.run(CreateRequest(
       auth: account!.jwt!,
       communityId: communityId,
       name: name,
@@ -144,6 +160,14 @@ Future<PostView> createPost({
       customThumbnail: customThumbnail?.isEmpty == true ? null : customThumbnail,
       nsfw: nsfw,
       languageId: languageId,
+      pickupLocation: pickupLocation,
+      pickupTime: pickupTime,
+      pickupNotes: pickupNotes,
+      pickupContact: pickupContact,
+      dropoffLocation: dropoffLocation,
+      dropoffTime: dropoffTime,
+      dropoffNotes: dropoffNotes,
+      dropoffContact: dropoffContact,
     ));
   }
 
