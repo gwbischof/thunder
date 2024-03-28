@@ -25,23 +25,44 @@ class CreatePostCubit extends Cubit<CreatePostState> {
 
     PictrsApi pictrs = PictrsApi(account.instance!);
 
-    isPostImage ? emit(state.copyWith(status: CreatePostStatus.postImageUploadInProgress)) : emit(state.copyWith(status: CreatePostStatus.imageUploadInProgress));
+    isPostImage
+        ? emit(state.copyWith(status: CreatePostStatus.postImageUploadInProgress))
+        : emit(state.copyWith(status: CreatePostStatus.imageUploadInProgress));
 
     try {
       PictrsUpload result = await pictrs.upload(filePath: imageFile, auth: account.jwt);
       String url = "https://${account.instance!}/pictrs/image/${result.files[0].file}";
 
-      isPostImage ? emit(state.copyWith(status: CreatePostStatus.postImageUploadSuccess, imageUrl: url)) : emit(state.copyWith(status: CreatePostStatus.imageUploadSuccess, imageUrl: url));
+      isPostImage
+          ? emit(state.copyWith(status: CreatePostStatus.postImageUploadSuccess, imageUrl: url))
+          : emit(state.copyWith(status: CreatePostStatus.imageUploadSuccess, imageUrl: url));
     } catch (e) {
       isPostImage
-          ? emit(state.copyWith(status: CreatePostStatus.postImageUploadFailure, message: e.toString()))
-          : emit(state.copyWith(status: CreatePostStatus.imageUploadFailure, message: e.toString()));
+          ? emit(state.copyWith(
+              status: CreatePostStatus.postImageUploadFailure, message: e.toString()))
+          : emit(
+              state.copyWith(status: CreatePostStatus.imageUploadFailure, message: e.toString()));
     }
   }
 
   /// Creates or edits a post. When successful, it emits the newly created/updated post in the form of a [PostViewMedia]
   /// and returns the newly created post id.
-  Future<int?> createOrEditPost({required int communityId, required String name, String? body, String? url, bool? nsfw, int? postIdBeingEdited, int? languageId}) async {
+  Future<int?> createOrEditPost(
+      {required int communityId,
+      required String name,
+      String? body,
+      String? url,
+      bool? nsfw,
+      int? postIdBeingEdited,
+      int? languageId,
+      String? pickupLocation,
+      String? pickupTime,
+      String? pickupNotes,
+      String? pickupContact,
+      String? dropoffLocation,
+      String? dropoffTime,
+      String? dropoffNotes,
+      String? dropoffContact}) async {
     emit(state.copyWith(status: CreatePostStatus.submitting));
 
     try {
@@ -53,12 +74,21 @@ class CreatePostCubit extends Cubit<CreatePostState> {
         nsfw: nsfw,
         postIdBeingEdited: postIdBeingEdited,
         languageId: languageId,
+        pickupLocation: pickupLocation,
+        pickupTime: pickupTime,
+        pickupNotes: pickupNotes,
+        pickupContact: pickupContact,
+        dropoffLocation: dropoffLocation,
+        dropoffTime: dropoffTime,
+        dropoffNotes: dropoffNotes,
+        dropoffContact: dropoffContact,
       );
 
       // Parse the newly created post
       List<PostViewMedia> postViewMedias = await parsePostViews([postView]);
 
-      emit(state.copyWith(status: CreatePostStatus.success, postViewMedia: postViewMedias.firstOrNull));
+      emit(state.copyWith(
+          status: CreatePostStatus.success, postViewMedia: postViewMedias.firstOrNull));
       return postViewMedias.firstOrNull?.postView.post.id;
     } catch (e) {
       emit(state.copyWith(status: CreatePostStatus.error, message: getExceptionErrorMessage(e)));
