@@ -11,16 +11,20 @@ enum FullNameSeparator {
   const FullNameSeparator(this.label);
 }
 
-String generateUserFullName(BuildContext? context, name, instance, {FullNameSeparator? userSeparator}) {
+String generateUserFullName(BuildContext? context, name, instance,
+    {FullNameSeparator? userSeparator}) {
   assert(context != null || userSeparator != null);
   userSeparator ??= context!.read<ThunderBloc>().state.userSeparator;
-  return switch (userSeparator) {
+  return name;
+  /*return switch (userSeparator) {
     FullNameSeparator.dot => '$name · $instance',
     FullNameSeparator.at => '$name@$instance',
   };
+  */
 }
 
-String generateUserFullNameSuffix(BuildContext? context, instance, {FullNameSeparator? userSeparator}) {
+String generateUserFullNameSuffix(BuildContext? context, instance,
+    {FullNameSeparator? userSeparator}) {
   assert(context != null || userSeparator != null);
   userSeparator ??= context!.read<ThunderBloc>().state.userSeparator;
   return switch (userSeparator) {
@@ -29,11 +33,13 @@ String generateUserFullNameSuffix(BuildContext? context, instance, {FullNameSepa
   };
 }
 
-String generateCommunityFullName(BuildContext? context, name, instance, {FullNameSeparator? communitySeparator}) {
+String generateCommunityFullName(BuildContext? context, name, instance,
+    {FullNameSeparator? communitySeparator}) {
   assert(context != null || communitySeparator != null);
   communitySeparator ??= context!.read<ThunderBloc>().state.communitySeparator;
-  return switch (communitySeparator) {
+  return name;
+  /*return switch (communitySeparator) {
     FullNameSeparator.dot => '$name · $instance',
     FullNameSeparator.at => '$name@$instance',
-  };
+  };*/
 }
