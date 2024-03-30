@@ -100,7 +100,7 @@ Future<PostView> createPost({
 
   PostResponse postResponse;
   if (postIdBeingEdited != null) {
-    postResponse = await lemmy.run(EditRequest(
+    postResponse = await lemmy.run(EditPost(
       auth: account!.jwt!,
       name: name,
       body: body,
@@ -118,7 +118,7 @@ Future<PostView> createPost({
       dropoffContact: dropoffContact,
     ));
   } else {
-    postResponse = await lemmy.run(CreateRequest(
+    postResponse = await lemmy.run(CreatePost(
       auth: account!.jwt!,
       communityId: communityId,
       name: name,
