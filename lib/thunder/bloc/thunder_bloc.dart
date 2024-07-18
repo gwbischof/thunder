@@ -31,6 +31,7 @@ import 'package:thunder/core/singletons/preferences.dart';
 import 'package:thunder/core/update/check_github_update.dart';
 import 'package:thunder/post/enums/post_card_metadata_item.dart';
 import 'package:thunder/utils/constants.dart';
+import 'package:thunder/globals.dart';
 
 part 'thunder_event.dart';
 
@@ -262,7 +263,7 @@ class ThunderBloc extends Bloc<ThunderEvent, ThunderState> {
       VideoAutoPlay videoAutoPlay = VideoAutoPlay.values.byName(prefs.getString(LocalSettings.videoAutoPlay.name) ?? VideoAutoPlay.never.name);
       VideoPlayBackSpeed videoDefaultPlaybackSpeed = VideoPlayBackSpeed.values.byName(prefs.getString(LocalSettings.videoDefaultPlaybackSpeed.name) ?? VideoPlayBackSpeed.normal.name);
 
-      String currentAnonymousInstance = prefs.getString(LocalSettings.currentAnonymousInstance.name) ?? 'lemmy.ml';
+      String currentAnonymousInstance = prefs.getString(LocalSettings.currentAnonymousInstance.name) ?? lemmyDefault;
 
       return emit(state.copyWith(
         status: ThunderStatus.success,

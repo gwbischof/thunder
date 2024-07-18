@@ -4,10 +4,12 @@ import 'dart:io';
 
 // Flutter imports
 import 'package:flutter/foundation.dart';
+import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Package imports
+import 'package:flutter_bloc/flutter_bloc.dart';
 import "package:flutter_displaymode/flutter_displaymode.dart";
 import 'package:dart_ping_ios/dart_ping_ios.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -45,6 +47,7 @@ import 'package:thunder/user/bloc/user_bloc.dart';
 import 'package:thunder/utils/cache.dart';
 import 'package:thunder/utils/global_context.dart';
 import 'package:thunder/utils/preferences.dart';
+import 'package:thunder/globals.dart';
 
 late AppDatabase database;
 
@@ -69,7 +72,7 @@ Future<void> initializeDatabase() async {
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  //FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   // Setting SystemUIMode
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -77,14 +80,15 @@ void main() async {
   await initializeDatabase();
 
   // Clear image cache
-  await clearExtendedImageCache();
+  //await clearExtendedImageCache();
 
   // Register dart_ping on iOS
   if (!kIsWeb && Platform.isIOS) {
     DartPingIOS.register();
   }
 
-  final String initialInstance = (await UserPreferences.instance).sharedPreferences.getString(LocalSettings.currentAnonymousInstance.name) ?? 'lemmy.ml';
+  final String initialInstance = (await UserPreferences.instance).sharedPreferences.getString(LocalSettings.currentAnonymousInstance.name) ?? 'hopandzip.com';
+
   LemmyClient.instance.changeBaseUrl(initialInstance);
 
   // Perform preference migrations
@@ -191,8 +195,12 @@ class _ThunderAppState extends State<ThunderApp> {
 
           return DynamicColorBuilder(
             builder: (lightColorScheme, darkColorScheme) {
-              ThemeData theme = FlexThemeData.light(useMaterial3: true, scheme: FlexScheme.values.byName(state.selectedTheme.name));
-              ThemeData darkTheme = FlexThemeData.dark(useMaterial3: true, scheme: FlexScheme.values.byName(state.selectedTheme.name), darkIsTrueBlack: state.themeType == ThemeType.pureBlack);
+              ThemeData theme = FlexThemeData.light(
+                  useMaterial3: true, scheme: FlexScheme.values.byName(state.selectedTheme.name));
+              ThemeData darkTheme = FlexThemeData.dark(
+                  useMaterial3: true,
+                  scheme: FlexScheme.values.byName(state.selectedTheme.name),
+                  darkIsTrueBlack: state.themeType == ThemeType.pureBlack);
 
               // Enable Material You theme
               if (state.useMaterialYouTheme == true) {
@@ -228,7 +236,10 @@ class _ThunderAppState extends State<ThunderApp> {
                 ),
               );
 
-              Locale? locale = AppLocalizations.supportedLocales.where((Locale locale) => locale.languageCode == thunderBloc.state.appLanguageCode).firstOrNull;
+              Locale? locale = AppLocalizations.supportedLocales
+                  .where(
+                      (Locale locale) => locale.languageCode == thunderBloc.state.appLanguageCode)
+                  .firstOrNull;
 
               return OverlaySupport.global(
                 child: MaterialApp.router(
@@ -244,12 +255,16 @@ class _ThunderAppState extends State<ThunderApp> {
                     Locale('eo'), // Additional locale which is not officially supported: Esperanto
                   ],
                   routerConfig: router,
-                  themeMode: state.themeType == ThemeType.system ? ThemeMode.system : (state.themeType == ThemeType.light ? ThemeMode.light : ThemeMode.dark),
+                  themeMode: state.themeType == ThemeType.system
+                      ? ThemeMode.system
+                      : (state.themeType == ThemeType.light ? ThemeMode.light : ThemeMode.dark),
                   theme: theme,
                   darkTheme: darkTheme,
                   debugShowCheckedModeBanner: false,
                   scaffoldMessengerKey: GlobalContext.scaffoldMessengerKey,
-                  scrollBehavior: (state.reduceAnimations && Platform.isAndroid) ? const ScrollBehavior().copyWith(overscroll: false) : null,
+                  scrollBehavior: (state.reduceAnimations && Platform.isAndroid)
+                      ? const ScrollBehavior().copyWith(overscroll: false)
+                      : null,
                 ),
               );
             },
@@ -259,3 +274,68 @@ class _ThunderAppState extends State<ThunderApp> {
     );
   }
 }
+
+// ---------------- START BACKGROUND FETCH STUFF ---------------- //
+
+/// This method handles "headless" callbacks,
+/// i.e., whent the app is not running
+@pragma('vm:entry-point')
+void backgroundFetchHeadlessTask(HeadlessTask task) async {
+  if (task.timeout) {
+    BackgroundFetch.finish(task.taskId);
+    return;
+  }
+  // Run the poll!
+  await pollRepliesAndShowNotifications();
+  BackgroundFetch.finish(task.taskId);
+}
+
+/// The method initializes background fetching while the app is running
+Future<void> initBackgroundFetch() async {
+  await BackgroundFetch.configure(
+    BackgroundFetchConfig(
+      minimumFetchInterval: 15,
+      stopOnTerminate: false,
+      startOnBoot: true,
+      enableHeadless: true,
+      requiredNetworkType: NetworkType.NONE,
+      requiresBatteryNotLow: false,
+      requiresStorageNotLow: false,
+      requiresCharging: false,
+      requiresDeviceIdle: false,
+      // Uncomment this line (and set the minimumFetchInterval to 1) for quicker testing.
+      //forceAlarmManager: true,
+    ),
+    // This is the callback that handles background fetching while the app is running.
+    (String taskId) async {
+      // Run the poll!
+      await pollRepliesAndShowNotifications();
+      BackgroundFetch.finish(taskId);
+    },
+    // This is the timeout callback.
+    (String taskId) async {
+      BackgroundFetch.finish(taskId);
+    },
+  );
+}
+
+void disableBackgroundFetch() async {
+  await BackgroundFetch.configure(
+    BackgroundFetchConfig(
+      minimumFetchInterval: 15,
+      stopOnTerminate: true,
+      startOnBoot: false,
+      enableHeadless: false,
+    ),
+    () {},
+    () {},
+  );
+}
+
+// This method initializes background fetching while the app is not running
+void initHeadlessBackgroundFetch() async {
+  BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+}
+
+
+// ---------------- END BACKGROUND FETCH STUFF ---------------- //

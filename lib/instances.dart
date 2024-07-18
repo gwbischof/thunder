@@ -48,4 +48,5 @@ const List<String> instances = [
   'thelemmy.club',
   'ttrpg.network',
   'yiffit.net',
+  'hopandzip.com',
 ];

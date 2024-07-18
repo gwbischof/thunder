@@ -20,6 +20,7 @@ import 'package:thunder/utils/instance.dart';
 import 'package:thunder/utils/links.dart';
 import 'package:thunder/utils/text_input_formatter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:thunder/globals.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback popRegister;

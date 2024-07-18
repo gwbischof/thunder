@@ -18,6 +18,7 @@ import 'package:thunder/account/bloc/account_bloc.dart';
 import 'package:thunder/account/models/account.dart';
 import 'package:thunder/comment/utils/navigate_comment.dart';
 import 'package:thunder/community/pages/create_post_page.dart';
+import 'package:thunder/community/pages/create_request_page.dart';
 import 'package:thunder/community/utils/post_card_action_helpers.dart';
 import 'package:thunder/community/widgets/post_card_type_badge.dart';
 import 'package:thunder/core/auth/bloc/auth_bloc.dart';
@@ -108,7 +109,8 @@ class _PostSubviewState extends State<PostSubview> with SingleTickerProviderStat
     final ThunderState thunderState = context.read<ThunderBloc>().state;
     final AuthState authState = context.watch<AuthBloc>().state;
 
-    final bool showScores = authState.getSiteResponse?.myUser?.localUserView.localUser.showScores ?? true;
+    final bool showScores =
+        authState.getSiteResponse?.myUser?.localUserView.localUser.showScores ?? true;
 
     final bool scrapeMissingPreviews = thunderState.scrapeMissingPreviews;
     final bool hideNsfwPreviews = thunderState.hideNsfwPreviews;
@@ -116,7 +118,8 @@ class _PostSubviewState extends State<PostSubview> with SingleTickerProviderStat
 
     final bool isOwnPost = postView.creator.id == context.read<AuthBloc>().state.account?.userId;
 
-    final List<PostView> sortedCrossPosts = List.from(widget.crossPosts ?? [])..sort((a, b) => b.counts.upvotes.compareTo(a.counts.upvotes));
+    final List<PostView> sortedCrossPosts = List.from(widget.crossPosts ?? [])
+      ..sort((a, b) => b.counts.upvotes.compareTo(a.counts.upvotes));
 
     List<UserType> userGroups = [];
 
@@ -153,8 +156,11 @@ class _PostSubviewState extends State<PostSubview> with SingleTickerProviderStat
                     IconButton(
                       visualDensity: VisualDensity.compact,
                       icon: Icon(
-                        expandableController.expanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-                        semanticLabel: expandableController.expanded ? l10n.collapsePost : l10n.expandPost,
+                        expandableController.expanded
+                            ? Icons.expand_less_rounded
+                            : Icons.expand_more_rounded,
+                        semanticLabel:
+                            expandableController.expanded ? l10n.collapsePost : l10n.expandPost,
                       ),
                       onPressed: () {
                         expandableController.toggle();
@@ -359,7 +365,8 @@ class _PostSubviewState extends State<PostSubview> with SingleTickerProviderStat
     );
   }
 
-  Widget _getMediaPreview(ThunderState thunderState, bool hideNsfwPreviews, bool markPostReadOnMediaView, bool isUserLoggedIn) {
+  Widget _getMediaPreview(ThunderState thunderState, bool hideNsfwPreviews,
+      bool markPostReadOnMediaView, bool isUserLoggedIn) {
     return Stack(
       alignment: AlignmentDirectional.bottomEnd,
       children: [

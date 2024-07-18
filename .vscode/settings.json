@@ -1,5 +1,5 @@
 {
-    "dart.lineLength": 200,
+    "dart.lineLength": 100,
     "[dart]": {
         "editor.formatOnSave": true,
         "editor.formatOnType": true,
@@ -46,4 +46,5 @@
             },
         ]
     }
+    "java.configuration.updateBuildConfiguration": "interactive",
 }
